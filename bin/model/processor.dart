@@ -1,6 +1,7 @@
 import 'enums.dart';
 import 'instruction.dart';
 import 'station.dart';
+import 'tupla.dart';
 
 class Processor {
   Processor({
@@ -8,21 +9,22 @@ class Processor {
     required this.instructions,
     required this.costs,
   });
+  int n = 0;
 
   final List<Station> stations;
   final List<Instruction> instructions;
   final Map<OpCode, int> costs;
-  final Map<int, int> registers = (() {
-    final t = <int, int>{};
+  final Map<int, Tupla> registers = (() {
+    final t = <int, Tupla>{};
 
     for (var i = 0; i < 32; i++) {
-      t[i] = 0;
+      t[i] = (new Tupla());
     }
 
     return t;
   })();
 
-  void nextStep() {
+  bool nextStep() {
     for (final station in stations) {
       station.nextStep(registers: registers);
     }
@@ -35,10 +37,19 @@ class Processor {
           if (item.currentInstruction == null) {
             instructions.removeAt(0);
 
-            item.loadInstruction(instruction: instruction, costs: costs);
+            item.loadInstruction(
+              id: n++,
+              instruction: instruction,
+              costs: costs,
+              registers: registers,
+            );
           }
         }
       }
+
+      return true;
+    } else {
+      return false;
     }
   }
 

@@ -1,5 +1,6 @@
 import 'enums.dart';
 import 'instruction.dart';
+import 'tupla.dart';
 
 class Station {
   Station({
@@ -10,26 +11,59 @@ class Station {
 
   int cyclesLeft = 0;
   Instruction? currentInstruction;
-  Instruction? waitingInstruction;
+  List<Instruction>? waitingInstruction;
 
-  void loadInstruction({
-    required Instruction instruction,
-    required Map<OpCode, int> costs,
-  }) {
+  void loadInstruction(
+      {required int id,
+      required Instruction instruction,
+      required Map<OpCode, int> costs,
+      required Map<int, Tupla> registers}) {
     print('loading instruction');
+
+    instruction.id = id;
+
+    if (instruction.opCode != OpCode.store) {
+      registers[instruction.register0]!.ocupado = StateRegister.recording;
+
+      if (instruction.register1 != null) {
+        registers[instruction.register1]!.ocupado = StateRegister.reading;
+      }
+
+      if (instruction.register2 != null) {
+        registers[instruction.register2]!.ocupado = StateRegister.reading;
+      }
+    } else {
+      registers[instruction.register0]!.ocupado = StateRegister.reading;
+
+      if (instruction.register1 != null) {
+        registers[instruction.register1]!.ocupado = StateRegister.reading;
+      }
+
+      if (instruction.register2 != null) {
+        registers[instruction.register2]!.ocupado = StateRegister.recording;
+      }
+    }
 
     currentInstruction = instruction;
     cyclesLeft = costs[instruction.opCode] ?? 0;
   }
 
   void nextStep({
-    required Map<int, int> registers,
+    required Map<int, Tupla> registers,
   }) {
-    if (cyclesLeft == 1) {
+    if (cyclesLeft > 1) {
+      cyclesLeft--;
+    } else if (cyclesLeft == 1) {
       currentInstruction?.execute(registers: registers);
       currentInstruction = null;
-    } else {
-      cyclesLeft--;
+      print('Finish instruction:', registers);
     }
+
+    // if (cyclesLeft == 1) {
+    //   currentInstruction?.execute(registers: registers);
+    //   currentInstruction = null;
+    // } else {
+    //   cyclesLeft--;
+    // }
   }
 }

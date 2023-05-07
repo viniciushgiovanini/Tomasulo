@@ -12,3 +12,9 @@ enum State {
   waiting,
   done,
 }
+
+enum StateRegister {
+  none,
+  reading,
+  recording,
+}
