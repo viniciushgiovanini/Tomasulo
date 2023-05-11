@@ -7,5 +7,5 @@ class Tupla {
   //   required this.ocupado,
   // });
   double valorRegistrador = 0.0;
-  StateRegister ocupado = StateRegister.none;
+  StateRegister state = StateRegister.none;
 }

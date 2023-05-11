@@ -28,24 +28,24 @@ class Station {
     instruction.id = id;
 
     if (instruction.opCode != OpCode.store) {
-      registers[instruction.register0]!.ocupado = StateRegister.recording;
+      registers[instruction.register0]!.state = StateRegister.recording;
 
       if (instruction.register1 != null) {
-        registers[instruction.register1]!.ocupado = StateRegister.reading;
+        registers[instruction.register1]!.state = StateRegister.reading;
       }
 
       if (instruction.register2 != null) {
-        registers[instruction.register2]!.ocupado = StateRegister.reading;
+        registers[instruction.register2]!.state = StateRegister.reading;
       }
     } else {
-      registers[instruction.register0]!.ocupado = StateRegister.reading;
+      registers[instruction.register0]!.state = StateRegister.reading;
 
       if (instruction.register1 != null) {
-        registers[instruction.register1]!.ocupado = StateRegister.reading;
+        registers[instruction.register1]!.state = StateRegister.reading;
       }
 
       if (instruction.register2 != null) {
-        registers[instruction.register2]!.ocupado = StateRegister.recording;
+        registers[instruction.register2]!.state = StateRegister.recording;
       }
     }
 
@@ -53,15 +53,45 @@ class Station {
     cyclesLeft = costs[instruction.opCode] ?? 0;
   }
 
+  bool verifyStateRegisters(Map<int, Tupla> registers) {
+    if (registers[currentInstruction?.register0]?.state != StateRegister.none) {
+      return false;
+    }
+
+    if (registers[currentInstruction?.register1] != null) {
+      if (registers[currentInstruction?.register1]?.state !=
+          StateRegister.none) {
+        return false;
+      }
+    }
+
+    if (registers[currentInstruction?.register2] != null) {
+      if (registers[currentInstruction?.register2]?.state !=
+          StateRegister.none) {
+        return false;
+      }
+    }
+    if (currentInstruction!.opCode != OpCode.load) {}
+    // registers[currentInstruction?.register2].state = StateRegister.
+
+    return true;
+  }
+
   void nextStep({
     required Map<int, Tupla> registers,
   }) {
+    if (!verifyStateRegisters(registers)) {
+      if (currentInstruction != null) {
+        currentInstruction!.waitRegister = true;
+      }
+    }
+
     if (cyclesLeft > 1) {
       cyclesLeft--;
     } else if (cyclesLeft == 1) {
-      currentInstruction?.execute(registers: registers);
+      currentInstruction?.execute();
       currentInstruction = null;
-      print('Finish instruction:', registers);
+      print('Finish instruction:');
     }
 
     // if (cyclesLeft == 1) {

@@ -55,6 +55,8 @@ class Processor {
 
   @override
   String toString() {
-    return registers.values.map((value) => value.toStringAsFixed(0)).join(' ');
+    return registers.values
+        .map((value) => value.valorRegistrador.toStringAsFixed(0))
+        .join(' ');
   }
 }
