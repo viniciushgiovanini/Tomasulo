@@ -2,18 +2,11 @@ import 'model/enums.dart';
 import 'model/instruction.dart';
 import 'model/processor.dart';
 import 'model/station.dart';
+import 'model/station_group.dart';
 import 'model/tupla.dart';
 
 void main() {
-  final processor = Processor(
-    stations: [
-      Station(opCodes: [OpCode.add, OpCode.sub]),
-      Station(opCodes: [OpCode.add, OpCode.sub]),
-      Station(opCodes: [OpCode.mul, OpCode.div]),
-      Station(opCodes: [OpCode.mul, OpCode.div]),
-      Station(opCodes: [OpCode.load, OpCode.store]),
-      Station(opCodes: [OpCode.load, OpCode.store]),
-    ],
+  final processor = new Processor(
     instructions: [
       Instruction(opCode: OpCode.load, register0: 1, value1: 2, register2: 8),
       Instruction(opCode: OpCode.load, register0: 2, value1: 2, register2: 9),
@@ -33,6 +26,9 @@ void main() {
       OpCode.store: 8,
     },
   );
+  processor.CriarEstacoes(opCode: [OpCode.add, OpCode.sub], numStatio: 2);
+  processor.CriarEstacoes(opCode: [OpCode.mul, OpCode.div], numStatio: 2);
+  processor.CriarEstacoes(opCode: [OpCode.load, OpCode.store], numStatio: 2);
 
   while (processor.nextStep());
 

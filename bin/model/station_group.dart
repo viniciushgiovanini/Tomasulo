@@ -23,11 +23,11 @@ class StationGroup {
     required Map<int, Tupla> registers,
   }) {
     for (var i = 0; i < numStations; i++) {
-      if (stations[i].currentInstruction != null) {
+      if (stations[i].currentInstruction == null) {
         stations[i].loadInstruction(
             instruction: instruction,
             registers: registers,
-            costs: cost[instruction.opCode]);
+            costs: costs[instruction.opCode]!);
       }
     }
   }
