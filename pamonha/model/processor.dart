@@ -38,7 +38,6 @@ class Processor {
             instructions.removeAt(0);
 
             item.loadInstruction(
-              id: n++,
               instruction: instruction,
               costs: costs,
               registers: registers,

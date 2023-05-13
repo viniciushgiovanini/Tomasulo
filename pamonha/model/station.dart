@@ -18,14 +18,12 @@ class Station {
   //fazer as dempendecias verdadeiras e falsas funcinarem pelos registradores
   //rodar cada instrução
   void loadInstruction({
-    required int id,
     required Instruction instruction,
     required Map<OpCode, int> costs,
     required Map<int, Tupla> registers,
   }) {
     print('loading instruction');
 
-    instruction.id = id;
     currentInstruction = instruction;
 
     currentInstruction!.waitRegister = verifyStateRegisters(registers);
