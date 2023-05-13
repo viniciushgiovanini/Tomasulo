@@ -19,7 +19,7 @@ class Station {
   //rodar cada instrução
   void loadInstruction({
     required Instruction instruction,
-    required Map<OpCode, int> costs,
+    required int costs,
     required Map<int, Tupla> registers,
   }) {
     print('loading instruction');
@@ -29,7 +29,7 @@ class Station {
     currentInstruction!.waitRegister = verifyStateRegisters(registers);
     if (instruction.waitRegister == false) carregaRegistradores(registers);
 
-    cyclesLeft = costs[instruction.opCode] ?? 0;
+    cyclesLeft = costs;
   }
 
   // Ocupado = true
@@ -68,6 +68,7 @@ class Station {
         registers[currentInstruction?.register2]?.state = StateRegister.reading;
       }
     } else {
+      // Store
       registers[currentInstruction?.register0]?.state = StateRegister.reading;
       registers[currentInstruction?.register2]?.state = StateRegister.recording;
     }
@@ -85,10 +86,13 @@ class Station {
     }
   }
 
+  // nextStep da propria station solo
   void nextStep({
     required Map<int, Tupla> registers,
   }) {
     if (currentInstruction != null) {
+      //currentInstruction!.waitRegister! = true // Tem alguem utilizando o registrador
+      //currentInstruction!.waitRegister! = false // Essa instrução esta utilizando os registradores
       if (currentInstruction!.waitRegister!) {
         currentInstruction!.waitRegister = verifyStateRegisters(registers);
         if (currentInstruction!.waitRegister == false) {
@@ -100,7 +104,7 @@ class Station {
         if (cyclesLeft > 1) {
           cyclesLeft--;
         } else if (cyclesLeft == 1) {
-          currentInstruction?.execute();
+          currentInstruction!.execute(registers: registers);
           currentInstruction = null;
           liberaRegistrador(registers);
           print('Finish instruction:');
