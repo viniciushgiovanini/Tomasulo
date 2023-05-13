@@ -26,72 +26,88 @@ class Station {
     print('loading instruction');
 
     instruction.id = id;
-
-    if (instruction.opCode != OpCode.store) {
-      registers[instruction.register0]!.state = StateRegister.recording;
-
-      if (instruction.register1 != null) {
-        registers[instruction.register1]!.state = StateRegister.reading;
-      }
-
-      if (instruction.register2 != null) {
-        registers[instruction.register2]!.state = StateRegister.reading;
-      }
-    } else {
-      registers[instruction.register0]!.state = StateRegister.reading;
-
-      if (instruction.register1 != null) {
-        registers[instruction.register1]!.state = StateRegister.reading;
-      }
-
-      if (instruction.register2 != null) {
-        registers[instruction.register2]!.state = StateRegister.recording;
-      }
-    }
-
     currentInstruction = instruction;
+
+    currentInstruction!.waitRegister = verifyStateRegisters(registers);
+    if (instruction.waitRegister == false) carregaRegistradores(registers);
+
     cyclesLeft = costs[instruction.opCode] ?? 0;
   }
 
+  // Ocupado = true
+  // Não ocupado = false
   bool verifyStateRegisters(Map<int, Tupla> registers) {
     if (registers[currentInstruction?.register0]?.state != StateRegister.none) {
-      return false;
+      return true;
     }
 
-    if (registers[currentInstruction?.register1] != null) {
+    if (currentInstruction?.register1 != null) {
       if (registers[currentInstruction?.register1]?.state !=
           StateRegister.none) {
-        return false;
+        return true;
       }
     }
 
-    if (registers[currentInstruction?.register2] != null) {
+    if (currentInstruction?.register2 != null) {
       if (registers[currentInstruction?.register2]?.state !=
           StateRegister.none) {
-        return false;
+        return true;
       }
     }
-    if (currentInstruction!.opCode != OpCode.load) {}
-    // registers[currentInstruction?.register2].state = StateRegister.
 
-    return true;
+    return false;
+  }
+
+  void carregaRegistradores(Map<int, Tupla> registers) {
+    if (currentInstruction!.opCode != OpCode.store) {
+      registers[currentInstruction?.register0]?.state = StateRegister.recording;
+
+      if (currentInstruction?.register1 != null) {
+        registers[currentInstruction?.register1]?.state = StateRegister.reading;
+      }
+
+      if (currentInstruction?.register2 != null) {
+        registers[currentInstruction?.register2]?.state = StateRegister.reading;
+      }
+    } else {
+      registers[currentInstruction?.register0]?.state = StateRegister.reading;
+      registers[currentInstruction?.register2]?.state = StateRegister.recording;
+    }
+  }
+
+  void liberaRegistrador(Map<int, Tupla> registers) {
+    registers[currentInstruction?.register0]?.state = StateRegister.none;
+
+    if (currentInstruction?.register1 != null) {
+      registers[currentInstruction?.register1]?.state = StateRegister.none;
+    }
+
+    if (currentInstruction?.register2 != null) {
+      registers[currentInstruction?.register2]?.state = StateRegister.none;
+    }
   }
 
   void nextStep({
     required Map<int, Tupla> registers,
   }) {
-    if (!verifyStateRegisters(registers)) {
-      if (currentInstruction != null) {
-        currentInstruction!.waitRegister = true;
+    if (currentInstruction != null) {
+      if (currentInstruction!.waitRegister!) {
+        currentInstruction!.waitRegister = verifyStateRegisters(registers);
+        if (currentInstruction!.waitRegister == false) {
+          carregaRegistradores(registers);
+        }
       }
-    }
 
-    if (cyclesLeft > 1) {
-      cyclesLeft--;
-    } else if (cyclesLeft == 1) {
-      currentInstruction?.execute();
-      currentInstruction = null;
-      print('Finish instruction:');
+      if (currentInstruction!.waitRegister == false) {
+        if (cyclesLeft > 1) {
+          cyclesLeft--;
+        } else if (cyclesLeft == 1) {
+          currentInstruction?.execute();
+          currentInstruction = null;
+          liberaRegistrador(registers);
+          print('Finish instruction:');
+        }
+      }
     }
 
     // if (cyclesLeft == 1) {
