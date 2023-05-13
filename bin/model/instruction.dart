@@ -1,6 +1,6 @@
 import 'dart:ffi';
 import 'enums.dart';
-import 'Tupla.dart';
+import 'tupla.dart';
 
 class Instruction {
   Instruction({

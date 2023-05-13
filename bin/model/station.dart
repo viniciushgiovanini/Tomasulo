@@ -107,7 +107,7 @@ class Station {
           currentInstruction!.execute(registers: registers);
           currentInstruction = null;
           liberaRegistrador(registers);
-          print('Finish instruction:');
+          print('Finish instruction');
         }
       }
     }

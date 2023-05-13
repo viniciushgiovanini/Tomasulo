@@ -42,6 +42,8 @@ class Processor {
       }
     }
 
+    print("\n Ciclo ${n++} \n\n");
+
     if (instructions.isNotEmpty) {
       final instruction = instructions.elementAt(0);
 
