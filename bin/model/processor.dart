@@ -36,13 +36,17 @@ class Processor {
   }
 
   bool nextStep() {
-    for (var stationGroup in listStations) {
-      for (var element in stationGroup.stations) {
-        element.nextStep(registers: registers);
-      }
-    }
+    bool acabou = false;
+    bool acabouMesmo = false;
 
     print("\n Ciclo ${n++} \n\n");
+
+    for (var stationGroup in listStations) {
+      acabou = stationGroup.nextStep(registers: registers);
+      if (acabou) {
+        acabouMesmo = true;
+      }
+    }
 
     if (instructions.isNotEmpty) {
       final instruction = instructions.elementAt(0);
@@ -55,13 +59,13 @@ class Processor {
             instruction: instruction,
             registers: registers,
           );
+
+          return true;
         }
       }
-
-      return true;
-    } else {
-      return false;
     }
+
+    return acabouMesmo;
   }
 
   @override

@@ -37,24 +37,27 @@ class Instruction {
               registers[register1]!.valorRegistrador +
                   registers[register2]!.valorRegistrador;
 
-          print("ADD R${register0}, R${register1}, R${register2};\n");
-          print("Valor de ADD: ${registers[register0]!.valorRegistrador}\n");
+          print("ADD R${register0}, R${register1}, R${register2};");
+          print(
+              "Valor de R${register0}: ${registers[register0]!.valorRegistrador}\n");
           break;
         case OpCode.sub:
           registers[register0]!.valorRegistrador =
               registers[register1]!.valorRegistrador -
                   registers[register2]!.valorRegistrador;
 
-          print("SUB R${register0}, R${register1}, R${register2};\n");
-          print("Valor de SUB ${registers[register0]!.valorRegistrador}\n");
+          print("SUB R${register0}, R${register1}, R${register2};");
+          print(
+              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
           break;
         case OpCode.mul:
           registers[register0]!.valorRegistrador =
               registers[register1]!.valorRegistrador *
                   registers[register2]!.valorRegistrador;
 
-          print("MUL R${register0}, R${register1}, R${register2};\n");
-          print("Valor de MUL ${registers[register0]!.valorRegistrador}\n");
+          print("MUL R${register0}, R${register1}, R${register2};");
+          print(
+              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
 
           break;
         case OpCode.div:
@@ -63,22 +66,25 @@ class Instruction {
                 registers[register1]!.valorRegistrador /
                     registers[register2]!.valorRegistrador;
 
-          print("DIV R${register0}, R${register1}, R${register2};\n");
-          print("Valor de DIV ${registers[register0]!.valorRegistrador}\n");
+          print("DIV R${register0}, R${register1}, R${register2};");
+          print(
+              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
           break;
         case OpCode.load:
           registers[register0]!.valorRegistrador =
               registers[register2]!.valorRegistrador;
 
-          print("LW R${register0}, R${register1}, R${register2};\n");
-          print("Valor de LW ${registers[register0]!.valorRegistrador}\n");
+          print("LW R${register0}, R${register1}, R${register2};");
+          print(
+              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
           break; // SW R1, 0(R2);
         case OpCode.store:
           registers[register2]!.valorRegistrador =
               registers[register0]!.valorRegistrador;
 
-          print("SW R${register0}, R${register1}, R${register2};\n");
-          print("Valor de SW ${registers[register2]!.valorRegistrador}\n");
+          print("SW R${register0}, R${register1}, R${register2};");
+          print(
+              "Valor de R${register2} ${registers[register2]!.valorRegistrador}\n");
           break;
       }
     } else if (register1 != null) {
@@ -88,22 +94,25 @@ class Instruction {
           registers[register0]!.valorRegistrador =
               registers[register1]!.valorRegistrador + value2!;
 
-          print("ADD R${register0}, R${register1}, R${register2};\n");
-          print("Valor de ADD: ${registers[register0]!.valorRegistrador}\n");
+          print("ADD R${register0}, R${register1}, ${value2};");
+          print(
+              "Valor de R${register0}: ${registers[register0]!.valorRegistrador}\n");
           break;
         case OpCode.sub:
           registers[register0]!.valorRegistrador =
               registers[register1]!.valorRegistrador - value2!;
 
-          print("SUB R${register0}, R${register1}, R${register2};\n");
-          print("Valor de SUB ${registers[register0]!.valorRegistrador}\n");
+          print("SUB R${register0}, R${register1}, ${value2};");
+          print(
+              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
           break;
         case OpCode.mul:
           registers[register0]!.valorRegistrador =
               registers[register1]!.valorRegistrador * value2!;
 
-          print("MUL R${register0}, R${register1}, R${register2};\n");
-          print("Valor de MUL ${registers[register0]!.valorRegistrador}\n");
+          print("MUL R${register0}, R${register1}, ${value2};");
+          print(
+              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
 
           break;
         case OpCode.div:
@@ -111,8 +120,9 @@ class Instruction {
             registers[register0]!.valorRegistrador =
                 registers[register1]!.valorRegistrador / value2!;
 
-            print("DIV R${register0}, R${register1}, R${register2};\n");
-            print("Valor de DIV ${registers[register0]!.valorRegistrador}\n");
+            print("DIV R${register0}, R${register1}, ${value2};");
+            print(
+                "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
           }
           break;
         case OpCode.load:
@@ -141,15 +151,17 @@ class Instruction {
           registers[register0]!.valorRegistrador =
               registers[register2]!.valorRegistrador;
 
-          print("LW R${register0}, ${value0}, R${register2};\n");
-          print("Valor de LW ${registers[register0]!.valorRegistrador}\n");
+          print("LW R${register0}, ${value1}, R${register2};");
+          print(
+              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
           break; // SW R1, 0(R2);
         case OpCode.store:
           registers[register2]!.valorRegistrador =
               registers[register0]!.valorRegistrador;
 
-          print("SW R${register0}, ${value1}, R${register2};\n");
-          print("Valor de SW ${registers[register2]!.valorRegistrador}\n");
+          print("SW R${register0}, ${value1}, R${register2};");
+          print(
+              "Valor de R${register2} ${registers[register2]!.valorRegistrador}\n");
           break;
       }
     }
