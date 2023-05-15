@@ -1,12 +1,10 @@
 import 'enums.dart';
 import 'station.dart';
 
-class Tupla {
-  // Tupla({
-  //   required this.valorRegistrador,
-  //   required this.ocupado,
-  // });
+class Registrador {
+  int id = -1;
   double valorRegistrador = 0.0;
   StateRegister state = StateRegister.none;
   Station? st = null;
+  double valorRegistradorFake = 0.0;
 }

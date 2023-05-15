@@ -1,7 +1,7 @@
+import 'register.dart';
 import 'station.dart';
 import 'instruction.dart';
 import 'enums.dart';
-import 'tupla.dart';
 
 class StationGroup {
   StationGroup({
@@ -19,7 +19,7 @@ class StationGroup {
 
   void loadInstruction({
     required Instruction instruction,
-    required Map<int, Tupla> registers,
+    required List<Registrador> registers,
   }) {
     for (var element in stations) {
       if (element.currentInstruction == null) {
@@ -27,7 +27,8 @@ class StationGroup {
           element.loadInstruction(
               instruction: instruction,
               registers: registers,
-              costs: costs[instruction.opCode]!);
+              costs: costs[instruction.opCode]!,
+              sta: element);
           return;
         }
       }
@@ -36,7 +37,10 @@ class StationGroup {
     instrucoes.add(instruction);
   }
 
-  bool nextStep({required Map<int, Tupla> registers}) {
+  bool nextStep({
+    required List<Registrador> registers,
+    required List<Instruction> reOrderBuffer,
+  }) {
     for (var element in stations) {
       if (element.currentInstruction != null) {
         element.nextStep(
@@ -48,6 +52,7 @@ class StationGroup {
             if (verifyStateRegisters(registers, instrucoes[i]) == false) {
               loadInstruction(instruction: instrucoes[i], registers: registers);
               instrucoes.remove(instrucoes[i]);
+              break;
             }
           }
         } else {
@@ -60,20 +65,137 @@ class StationGroup {
 
   // Ocupado = true
   // Não ocupado = false
+  bool verifyDependenceRegisters(
+    List<Registrador> registers,
+    List<Instruction> reOrderBuffer,
+    Instruction instruction,
+    Map<Registrador, double> fakeRegisters,
+  ) {
+    var ocupado = false;
+    var ocupadoMesmo = false;
+    if(instruction.register0.state == StateRegister.none){
+
+      ocupado = colocaWaitList(registers,instruction.register2,fakeRegisters,instruction);
+      if(ocupado == true ){
+        ocupadoMesmo = true;
+      }
+      colocaWaitList(registers,instruction.register2,fakeRegisters,instruction);
+      if(ocupado == true ){
+        ocupadoMesmo = true;
+      }
+
+      return ocupadoMesmo;
+    }
+
+    if(instruction.opCode != OpCode.store){
+      if(fakeRegisters.containsKey(instruction.register0)){
+        
+      }
+    }
+
+    if(){
+      if(instruction.register0.state == StateRegister.reading){
+        return false;
+      }else{
+
+      }
+    }
+    if(fakeRegisters.containsKey(instruction.register1)){
+      return false;
+    }
+    if(fakeRegisters.containsKey(instruction.register2)){
+      return false;
+    }
+
+    if (instruction.register0.state == StateRegister.recording) {
+      instruction.register0.st!.waitingInstruction.add(instruction);
+    } else if (instruction.register0.state == StateRegister.reading) {
+        if (fakeRegisters.containsKey(instruction.register0) == false) {
+          fakeRegisters[instruction.register0] = instruction.register0.valorRegistrador;
+        }
+      }
+
+      
+      
+      
+    }
+      
+    if (instruction.register1?.st != null) {}
+
+    if (verifyStateRegisters(registers, instruction)) {
+      if (instruction.register0.state != StateRegister.none) {
+        return true;
+      }
+
+      if (instruction.register1 != null) {
+        if (instruction.register1?.state != StateRegister.none) {
+          return true;
+        }
+      }
+
+      if (instruction.register2 != null) {
+        if (instruction.register2?.state != StateRegister.none) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // true = pode fazer não
+  // false = pode fazer
+  bool colocaWaitList(List<Registrador> registers,
+    Registrador? reg,
+    Map<Registrador, double> fakeRegisters, Instruction instruction){
+    if(reg != null){ // se tem registrador
+        if(reg != StateRegister.none){// se tem alguem utilizando
+          if(reg == StateRegister.recording){// se tiver sendo gravado
+            reg.st!.waitingInstruction.add(instruction);
+            return true;
+          }else{
+            if (fakeRegisters.containsKey(instruction.register0) == false) {
+              fakeRegisters[reg] = instruction.register0.valorRegistrador;
+            }
+          }
+        }
+      }
+      return false;
+  }
+
+  // bool verifyStateRegisters(
+  //     List<Registrador> registers, Instruction instruction) {
+  //   if (instruction.register0]?.state != StateRegister.none) {
+  //     return true;
+  //   }
+
+  //   if (instruction.register1 != null) {
+  //     if (instruction.register1]?.state != StateRegister.none) {
+  //       return true;
+  //     }
+  //   }
+
+  //   if (instruction.register2 != null) {
+  //     if (instruction.register2]?.state != StateRegister.none) {
+  //       return true;
+  //     }
+  //   }
+
+  //   return false;
+  // }
   bool verifyStateRegisters(
-      Map<int, Tupla> registers, Instruction instruction) {
-    if (registers[instruction.register0]?.state != StateRegister.none) {
+      List<Registrador> registers, Instruction instruction) {
+    if (instruction.register0.state != StateRegister.none) {
       return true;
     }
 
     if (instruction.register1 != null) {
-      if (registers[instruction.register1]?.state != StateRegister.none) {
+      if (instruction.register1?.state != StateRegister.none) {
         return true;
       }
     }
 
     if (instruction.register2 != null) {
-      if (registers[instruction.register2]?.state != StateRegister.none) {
+      if (instruction.register2?.state != StateRegister.none) {
         return true;
       }
     }

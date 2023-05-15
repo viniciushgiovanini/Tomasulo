@@ -1,6 +1,5 @@
-import 'dart:ffi';
 import 'enums.dart';
-import 'tupla.dart';
+import 'register.dart';
 
 class Instruction {
   Instruction({
@@ -8,17 +7,15 @@ class Instruction {
     required this.register0,
     this.register1,
     this.register2,
-    this.value0,
     this.value1,
     this.value2,
   });
 
   int id = -1;
   final OpCode opCode;
-  final int register0;
-  final int? register1;
-  final int? register2;
-  final double? value0;
+  final Registrador register0;
+  final Registrador? register1;
+  final Registrador? register2;
   final double? value1;
   final double? value2;
   bool? waitRegister = false;
@@ -26,103 +23,83 @@ class Instruction {
   State state = State.ready;
 
   void execute({
-    required Map<int, Tupla> registers,
+    required List<Registrador> registers,
   }) {
     // Colocar print dos resultados das ops.
     if (register2 != null && register1 != null) {
       // Switch Completo -> Três registradores.
       switch (opCode) {
         case OpCode.add:
-          registers[register0]!.valorRegistrador =
-              registers[register1]!.valorRegistrador +
-                  registers[register2]!.valorRegistrador;
+          register0.valorRegistrador =
+              register1!.valorRegistrador + register2!.valorRegistrador;
 
           print("ADD R${register0}, R${register1}, R${register2};");
-          print(
-              "Valor de R${register0}: ${registers[register0]!.valorRegistrador}\n");
+          print("Valor de R${register0}: ${register0.valorRegistrador}\n");
           break;
         case OpCode.sub:
-          registers[register0]!.valorRegistrador =
-              registers[register1]!.valorRegistrador -
-                  registers[register2]!.valorRegistrador;
+          register0.valorRegistrador =
+              register1!.valorRegistrador - register2!.valorRegistrador;
 
           print("SUB R${register0}, R${register1}, R${register2};");
-          print(
-              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
+          print("Valor de R${register0} ${register0.valorRegistrador}\n");
           break;
         case OpCode.mul:
-          registers[register0]!.valorRegistrador =
-              registers[register1]!.valorRegistrador *
-                  registers[register2]!.valorRegistrador;
+          register0.valorRegistrador =
+              register1!.valorRegistrador * register2!.valorRegistrador;
 
           print("MUL R${register0}, R${register1}, R${register2};");
-          print(
-              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
+          print("Valor de R${register0} ${register0.valorRegistrador}\n");
 
           break;
         case OpCode.div:
-          if ((registers[register2]!.valorRegistrador) != 0)
-            registers[register0]!.valorRegistrador =
-                registers[register1]!.valorRegistrador /
-                    registers[register2]!.valorRegistrador;
+          if ((register2!.valorRegistrador) != 0)
+            register0.valorRegistrador =
+                register1!.valorRegistrador / register2!.valorRegistrador;
 
           print("DIV R${register0}, R${register1}, R${register2};");
-          print(
-              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
+          print("Valor de R${register0} ${register0.valorRegistrador}\n");
           break;
         case OpCode.load:
-          registers[register0]!.valorRegistrador =
-              registers[register2]!.valorRegistrador;
+          register0.valorRegistrador = register2!.valorRegistrador;
 
           print("LW R${register0}, R${register1}, R${register2};");
-          print(
-              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
+          print("Valor de R${register0} ${register0.valorRegistrador}\n");
           break; // SW R1, 0(R2);
         case OpCode.store:
-          registers[register2]!.valorRegistrador =
-              registers[register0]!.valorRegistrador;
+          register2!.valorRegistrador = register0.valorRegistrador;
 
           print("SW R${register0}, R${register1}, R${register2};");
-          print(
-              "Valor de R${register2} ${registers[register2]!.valorRegistrador}\n");
+          print("Valor de R${register2} ${register2!.valorRegistrador}\n");
           break;
       }
     } else if (register1 != null) {
       // Switch Registrador 0 e 1 -> Dois registradores.
       switch (opCode) {
         case OpCode.add:
-          registers[register0]!.valorRegistrador =
-              registers[register1]!.valorRegistrador + value2!;
+          register0.valorRegistrador = register1!.valorRegistrador + value2!;
 
           print("ADD R${register0}, R${register1}, ${value2};");
-          print(
-              "Valor de R${register0}: ${registers[register0]!.valorRegistrador}\n");
+          print("Valor de R${register0}: ${register0.valorRegistrador}\n");
           break;
         case OpCode.sub:
-          registers[register0]!.valorRegistrador =
-              registers[register1]!.valorRegistrador - value2!;
+          register0.valorRegistrador = register1!.valorRegistrador - value2!;
 
           print("SUB R${register0}, R${register1}, ${value2};");
-          print(
-              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
+          print("Valor de R${register0} ${register0.valorRegistrador}\n");
           break;
         case OpCode.mul:
-          registers[register0]!.valorRegistrador =
-              registers[register1]!.valorRegistrador * value2!;
+          register0.valorRegistrador = register1!.valorRegistrador * value2!;
 
           print("MUL R${register0}, R${register1}, ${value2};");
-          print(
-              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
+          print("Valor de R${register0} ${register0.valorRegistrador}\n");
 
           break;
         case OpCode.div:
           if (value2 != 0) {
-            registers[register0]!.valorRegistrador =
-                registers[register1]!.valorRegistrador / value2!;
+            register0.valorRegistrador = register1!.valorRegistrador / value2!;
 
             print("DIV R${register0}, R${register1}, ${value2};");
-            print(
-                "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
+            print("Valor de R${register0} ${register0.valorRegistrador}\n");
           }
           break;
         case OpCode.load:
@@ -148,20 +125,16 @@ class Instruction {
           print("Peidou na farofa sub\n");
           break;
         case OpCode.load:
-          registers[register0]!.valorRegistrador =
-              registers[register2]!.valorRegistrador;
+          register0.valorRegistrador = register2!.valorRegistrador;
 
           print("LW R${register0}, ${value1}, R${register2};");
-          print(
-              "Valor de R${register0} ${registers[register0]!.valorRegistrador}\n");
+          print("Valor de R${register0} ${register0.valorRegistrador}\n");
           break; // SW R1, 0(R2);
         case OpCode.store:
-          registers[register2]!.valorRegistrador =
-              registers[register0]!.valorRegistrador;
+          register2!.valorRegistrador = register0.valorRegistrador;
 
           print("SW R${register0}, ${value1}, R${register2};");
-          print(
-              "Valor de R${register2} ${registers[register2]!.valorRegistrador}\n");
+          print("Valor de R${register2} ${register2!.valorRegistrador}\n");
           break;
       }
     }

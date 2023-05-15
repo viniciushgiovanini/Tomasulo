@@ -1,6 +1,6 @@
 import 'enums.dart';
 import 'instruction.dart';
-import 'tupla.dart';
+import 'register.dart';
 
 class Station {
   Station({
@@ -11,7 +11,7 @@ class Station {
 
   int cyclesLeft = 0;
   Instruction? currentInstruction;
-  List<Instruction>? waitingInstruction;
+  List<Instruction> waitingInstruction = [];
 
   //colocar ocupado nos registradores // OK
   //terminar o loadInstruction pra colocar na station
@@ -20,7 +20,8 @@ class Station {
   void loadInstruction({
     required Instruction instruction,
     required int costs,
-    required Map<int, Tupla> registers,
+    required List<Registrador> registers,
+    required Station sta,
   }) {
     currentInstruction = instruction;
 
@@ -28,7 +29,7 @@ class Station {
     print("Carregando instrução: ");
     mostraRegistrador(instruction);
     if (instruction.waitRegister == false) {
-      carregaRegistradores(registers);
+      carregaRegistradores(registers, sta);
     }
 
     cyclesLeft = costs;
@@ -36,21 +37,19 @@ class Station {
 
   // Ocupado = true
   // Não ocupado = false
-  bool verifyStateRegisters(Map<int, Tupla> registers) {
-    if (registers[currentInstruction?.register0]?.state != StateRegister.none) {
+  bool verifyStateRegisters(List<Registrador> registers) {
+    if (currentInstruction?.register0.state != StateRegister.none) {
       return true;
     }
 
     if (currentInstruction?.register1 != null) {
-      if (registers[currentInstruction?.register1]?.state !=
-          StateRegister.none) {
+      if (currentInstruction?.register1?.state != StateRegister.none) {
         return true;
       }
     }
 
     if (currentInstruction?.register2 != null) {
-      if (registers[currentInstruction?.register2]?.state !=
-          StateRegister.none) {
+      if (currentInstruction?.register2?.state != StateRegister.none) {
         return true;
       }
     }
@@ -58,39 +57,52 @@ class Station {
     return false;
   }
 
-  void carregaRegistradores(Map<int, Tupla> registers) {
+  void carregaRegistradores(List<Registrador> registers, Station sta) {
+    currentInstruction?.register0?.st = sta;
+
     if (currentInstruction!.opCode != OpCode.store) {
-      registers[currentInstruction?.register0]?.state = StateRegister.recording;
+      currentInstruction?.register0?.state = StateRegister.recording;
 
       if (currentInstruction?.register1 != null) {
-        registers[currentInstruction?.register1]?.state = StateRegister.reading;
+        currentInstruction?.register1?.state = StateRegister.reading;
+        currentInstruction?.register1?.st = sta;
       }
 
       if (currentInstruction?.register2 != null) {
-        registers[currentInstruction?.register2]?.state = StateRegister.reading;
+        currentInstruction?.register2?.state = StateRegister.reading;
+        currentInstruction?.register2?.st = sta;
       }
     } else {
       // Store
-      registers[currentInstruction?.register0]?.state = StateRegister.reading;
-      registers[currentInstruction?.register2]?.state = StateRegister.recording;
+      currentInstruction?.register0?.state = StateRegister.reading;
+
+      if (currentInstruction?.register1 != null) {
+        currentInstruction?.register1?.state = StateRegister.reading;
+        currentInstruction?.register1?.st = sta;
+      }
+
+      if (currentInstruction?.register2 != null) {
+        currentInstruction?.register2?.state = StateRegister.recording;
+        currentInstruction?.register2?.st = sta;
+      }
     }
   }
 
-  void liberaRegistrador(Map<int, Tupla> registers) {
-    registers[currentInstruction?.register0]?.state = StateRegister.none;
+  void liberaRegistrador(List<Registrador> registers) {
+    currentInstruction?.register0.state = StateRegister.none;
 
     if (currentInstruction?.register1 != null) {
-      registers[currentInstruction?.register1]?.state = StateRegister.none;
+      currentInstruction?.register1?.state = StateRegister.none;
     }
 
     if (currentInstruction?.register2 != null) {
-      registers[currentInstruction?.register2]?.state = StateRegister.none;
+      currentInstruction?.register2?.state = StateRegister.none;
     }
   }
 
   // nextStep da propria station solo
   bool nextStep({
-    required Map<int, Tupla> registers,
+    required List<Registrador> registers,
     required int costs,
   }) {
     // if (currentInstruction != null) {
