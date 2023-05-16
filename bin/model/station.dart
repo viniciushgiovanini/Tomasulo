@@ -58,7 +58,7 @@ class Station {
   }
 
   void carregaRegistradores(List<Registrador> registers, Station sta) {
-    currentInstruction?.register0?.st = sta;
+    currentInstruction?.register0.st = sta;
 
     if (currentInstruction!.opCode != OpCode.store) {
       currentInstruction?.register0?.state = StateRegister.recording;

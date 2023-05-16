@@ -37,10 +37,11 @@ class StationGroup {
     instrucoes.add(instruction);
   }
 
-  bool nextStep({
-    required List<Registrador> registers,
-    required List<Instruction> reOrderBuffer,
-  }) {
+  bool nextStep(
+      {required List<Registrador> registers,
+      required List<Instruction> reOrderBuffer,
+      required Map<Registrador, double> regFake,
+      required List<Registrador> reg}) {
     for (var element in stations) {
       if (element.currentInstruction != null) {
         element.nextStep(
@@ -130,49 +131,60 @@ class StationGroup {
     return false;
   }
 
-  bool dependenciaFalsa(
-      Instruction instruction, Instruction novaInstrucao, Station station) {
+  // Erro no tipe no mapRegister
+  bool dependenciaFalsa(Instruction instruction, Instruction novaInstrucao,
+      Map<Registrador, double> regFake, List<Registrador> reg) {
     if (instruction.opCode != OpCode.store) {
-      if (instruction.register1 == novaInstrucao.register0) {
-        return true;
+      if (instruction.register1 != null) {
+        if (instruction.register1 == novaInstrucao.register0) {
+          final mapRegister = <Registrador, double>{
+            instruction.register1!: instruction.register1!.valorRegistrador
+          };
+
+          final d = MapEntry<Registrador, double>(
+              instruction.register1!, instruction.register1!.valorRegistrador);
+
+          regFake.addEntries(mapRegister);
+          return true;
+        }
+      }
+
+      if (instruction.register2 != null) {
+        if (instruction.register2 == novaInstrucao.register0) {
+          return true;
+        }
       }
 
       if (instruction.register0 == novaInstrucao.register0) {
         novaInstrucao.waitRegister = true;
-        station.waitingInstruction.add(novaInstrucao);
         return true;
       }
       if (novaInstrucao.register1 != null) {
         if (instruction.register0 == novaInstrucao.register1) {
           novaInstrucao.waitRegister = true;
-          station.waitingInstruction.add(novaInstrucao);
           return true;
         }
       }
       if (novaInstrucao.register2 != null) {
         if (instruction.register0 == novaInstrucao.register2) {
           novaInstrucao.waitRegister = true;
-          station.waitingInstruction.add(novaInstrucao);
           return true;
         }
       }
     } else {
       if (instruction.register2 == novaInstrucao.register0) {
         novaInstrucao.waitRegister = true;
-        station.waitingInstruction.add(novaInstrucao);
         return true;
       }
       if (novaInstrucao.register1 != null) {
         if (instruction.register2 == novaInstrucao.register1) {
           novaInstrucao.waitRegister = true;
-          station.waitingInstruction.add(novaInstrucao);
           return true;
         }
       }
       if (novaInstrucao.register2 != null) {
         if (instruction.register2 == novaInstrucao.register2) {
           novaInstrucao.waitRegister = true;
-          station.waitingInstruction.add(novaInstrucao);
           return true;
         }
       }
