@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'enums.dart';
 import 'instruction.dart';
 import 'register.dart';
@@ -7,7 +9,7 @@ class Processor {
   Processor({
     required this.costs,
   });
-  int n = 0;
+  int n = 1;
   int ids = 0;
   // List<StationGroup> listStations = new List.empty(growable: true);
   List<StationGroup> listStations = [];
@@ -18,8 +20,10 @@ class Processor {
     final t = <Registrador>[];
 
     for (var i = 0; i < 22; i++) {
-      t[i] = (new Registrador());
+      t.add(new Registrador());
       t[i].id = i;
+      // t[i] = (new Registrador());
+      // t[i].id = i;
     }
 
     return t;
@@ -61,8 +65,8 @@ class Processor {
     required register0,
     register1,
     register2,
-    value1,
-    value2,
+    double? value1,
+    double? value2,
   }) {
     if (register1 != null && register2 != null)
       instructions.add(Instruction(
@@ -86,17 +90,11 @@ class Processor {
   }
 
   bool nextStep() {
-    bool acabou = false;
-    bool acabouMesmo = false;
-
     print("\n Ciclo ${n++} \n\n");
 
     for (var stationGroup in listStations) {
-      acabou =
-          stationGroup.nextStep(registers: reg, reOrderBuffer: reOrderBuffer);
-      if (acabou) {
-        acabouMesmo = true;
-      }
+      stationGroup.nextStep(
+          registers: reg, reOrderBuffer: reOrderBuffer, regFake: regFake);
     }
 
     if (instructions.isNotEmpty) {
@@ -108,6 +106,8 @@ class Processor {
           reOrderBuffer.add(instruction);
           stationGroup.loadInstruction(
             instruction: instruction,
+            reOrderBuffer: reOrderBuffer,
+            regFake: regFake,
             registers: reg,
           );
 
@@ -116,7 +116,7 @@ class Processor {
       }
     }
 
-    return acabouMesmo;
+    return reOrderBuffer.length > 0;
   }
 
   // @override

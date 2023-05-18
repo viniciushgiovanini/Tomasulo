@@ -1,5 +1,4 @@
 import 'model/enums.dart';
-import 'model/instruction.dart';
 import 'model/processor.dart';
 
 void main() {

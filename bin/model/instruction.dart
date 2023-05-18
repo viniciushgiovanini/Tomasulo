@@ -18,88 +18,89 @@ class Instruction {
   final Registrador? register2;
   final double? value1;
   final double? value2;
+  bool? dependenciaVerdadeira = false;
+  bool? dependenciaFalsa = false;
   bool? waitRegister = false;
 
   State state = State.ready;
 
-  void execute({
-    required List<Registrador> registers,
-  }) {
+  void execute(
+      {required List<Registrador> registers,
+      required Map<Registrador, double> regFake}) {
     // Colocar print dos resultados das ops.
+    double operacao = 0;
+
     if (register2 != null && register1 != null) {
       // Switch Completo -> Três registradores.
       switch (opCode) {
         case OpCode.add:
-          register0.valorRegistrador =
-              register1!.valorRegistrador + register2!.valorRegistrador;
+          operacao = register1!.valorRegistrador + register2!.valorRegistrador;
 
-          print("ADD R${register0}, R${register1}, R${register2};");
-          print("Valor de R${register0}: ${register0.valorRegistrador}\n");
+          print("ADD R${register0.id}, R${register1!.id}, R${register2!.id};");
+          print("Valor de R${register0.id}: ${operacao}\n");
           break;
         case OpCode.sub:
-          register0.valorRegistrador =
-              register1!.valorRegistrador - register2!.valorRegistrador;
+          operacao = register1!.valorRegistrador - register2!.valorRegistrador;
 
-          print("SUB R${register0}, R${register1}, R${register2};");
-          print("Valor de R${register0} ${register0.valorRegistrador}\n");
+          print("SUB R${register0.id}, R${register1!.id}, R${register2!.id};");
+          print("Valor de R${register0.id} ${operacao}\n");
           break;
         case OpCode.mul:
-          register0.valorRegistrador =
-              register1!.valorRegistrador * register2!.valorRegistrador;
+          operacao = register1!.valorRegistrador * register2!.valorRegistrador;
 
-          print("MUL R${register0}, R${register1}, R${register2};");
-          print("Valor de R${register0} ${register0.valorRegistrador}\n");
+          print("MUL R${register0.id}, R${register1!.id}, R${register2!.id};");
+          print("Valor de R${register0.id} ${operacao}\n");
 
           break;
         case OpCode.div:
           if ((register2!.valorRegistrador) != 0)
-            register0.valorRegistrador =
+            operacao =
                 register1!.valorRegistrador / register2!.valorRegistrador;
 
-          print("DIV R${register0}, R${register1}, R${register2};");
-          print("Valor de R${register0} ${register0.valorRegistrador}\n");
+          print("DIV R${register0.id}, R${register1!.id}, R${register2!.id};");
+          print("Valor de R${register0.id} ${operacao}\n");
           break;
         case OpCode.load:
-          register0.valorRegistrador = register2!.valorRegistrador;
+          operacao = register2!.valorRegistrador;
 
-          print("LW R${register0}, R${register1}, R${register2};");
-          print("Valor de R${register0} ${register0.valorRegistrador}\n");
+          print("LW R${register0.id}, R${register1!.id}, R${register2!.id};");
+          print("Valor de R${register0.id} ${operacao}\n");
           break; // SW R1, 0(R2);
         case OpCode.store:
-          register2!.valorRegistrador = register0.valorRegistrador;
+          operacao = register0.valorRegistrador;
 
-          print("SW R${register0}, R${register1}, R${register2};");
-          print("Valor de R${register2} ${register2!.valorRegistrador}\n");
+          print("SW R${register0.id}, R${register1!.id}, R${register2!.id};");
+          print("Valor de R${register2!.id} ${operacao}\n");
           break;
       }
     } else if (register1 != null) {
       // Switch Registrador 0 e 1 -> Dois registradores.
       switch (opCode) {
         case OpCode.add:
-          register0.valorRegistrador = register1!.valorRegistrador + value2!;
+          operacao = register1!.valorRegistrador + value2!;
 
-          print("ADD R${register0}, R${register1}, ${value2};");
-          print("Valor de R${register0}: ${register0.valorRegistrador}\n");
+          print("ADD R${register0.id}, R${register1!.id}, ${value2};");
+          print("Valor de R${register0.id}: ${operacao}\n");
           break;
         case OpCode.sub:
-          register0.valorRegistrador = register1!.valorRegistrador - value2!;
+          operacao = register1!.valorRegistrador - value2!;
 
-          print("SUB R${register0}, R${register1}, ${value2};");
-          print("Valor de R${register0} ${register0.valorRegistrador}\n");
+          print("SUB R${register0.id}, R${register1!.id}, ${value2};");
+          print("Valor de R${register0.id} ${operacao}\n");
           break;
         case OpCode.mul:
-          register0.valorRegistrador = register1!.valorRegistrador * value2!;
+          operacao = register1!.valorRegistrador * value2!;
 
-          print("MUL R${register0}, R${register1}, ${value2};");
-          print("Valor de R${register0} ${register0.valorRegistrador}\n");
+          print("MUL R${register0.id}, R${register1!.id}, ${value2};");
+          print("Valor de R${register0.id} ${operacao}\n");
 
           break;
         case OpCode.div:
           if (value2 != 0) {
-            register0.valorRegistrador = register1!.valorRegistrador / value2!;
+            operacao = register1!.valorRegistrador / value2!;
 
-            print("DIV R${register0}, R${register1}, ${value2};");
-            print("Valor de R${register0} ${register0.valorRegistrador}\n");
+            print("DIV R${register0.id}, R${register1!.id}, ${value2};");
+            print("Valor de R${register0.id} ${operacao}\n");
           }
           break;
         case OpCode.load:
@@ -125,18 +126,28 @@ class Instruction {
           print("Peidou na farofa sub\n");
           break;
         case OpCode.load:
-          register0.valorRegistrador = register2!.valorRegistrador;
+          operacao = register2!.valorRegistrador;
 
-          print("LW R${register0}, ${value1}, R${register2};");
-          print("Valor de R${register0} ${register0.valorRegistrador}\n");
+          print("LW R${register0.id}, ${value1}, R${register2!.id};");
+          print("Valor de R${register0.id} ${operacao}\n");
           break; // SW R1, 0(R2);
         case OpCode.store:
-          register2!.valorRegistrador = register0.valorRegistrador;
+          operacao = register0.valorRegistrador;
 
-          print("SW R${register0}, ${value1}, R${register2};");
-          print("Valor de R${register2} ${register2!.valorRegistrador}\n");
+          print("SW R${register0.id}, ${value1}, R${register2!.id};");
+          print("Valor de R${register2!.id} ${operacao}\n");
           break;
       }
+    }
+
+    if (!regFake.containsKey(register0) && opCode != OpCode.store) {
+      register0.valorRegistrador = operacao;
+    } else if (opCode != OpCode.store) {
+      regFake[register0] = operacao;
+    } else if (regFake.containsKey(register2)) {
+      register2!.valorRegistrador = operacao;
+    } else {
+      regFake[register2!] = operacao;
     }
   }
 

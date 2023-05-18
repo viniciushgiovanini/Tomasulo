@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'enums.dart';
 import 'instruction.dart';
 import 'register.dart';
@@ -22,18 +24,73 @@ class Station {
     required int costs,
     required List<Registrador> registers,
     required Station sta,
+    required Map<Registrador, double> regFake,
   }) {
     currentInstruction = instruction;
+    if (instruction.opCode != OpCode.store) {
+      instruction.register0.st = sta;
+    } else {
+      instruction.register2!.st = sta;
+    }
 
-    currentInstruction!.waitRegister = verifyStateRegisters(registers);
+    // if(instruction.register0)
+    // currentInstruction!.waitRegister = verifyStateRegisters(registers);
     print("Carregando instrução: ");
-    mostraRegistrador(instruction);
+    mostraRegistrador(instruction, regFake);
     if (instruction.waitRegister == false) {
       carregaRegistradores(registers, sta);
     }
 
     cyclesLeft = costs;
   }
+  //  bool verifyRegistradorFalso(List<Registrador> registers, Map<Registrador, double> regFake, Instruction instruction) {
+
+  //   if(instruction.opCode != OpCode.store){
+  //     if(regFake.containsKey(instruction.register0)){
+  //       instruction.register0.
+  //     }else{
+
+  //     }
+
+  //     if (instruction.register0 == novaInstrucao.register0) {
+  //       novaInstrucao.waitRegister = true;
+  //       station.waitingInstruction.add(novaInstrucao);
+  //       return true;
+  //     }
+  //     if (novaInstrucao.register1 != null) {
+  //       if (instruction.register0 == novaInstrucao.register1) {
+  //         novaInstrucao.waitRegister = true;
+  //         station.waitingInstruction.add(novaInstrucao);
+  //         return true;
+  //       }
+  //     }
+  //     if (novaInstrucao.register2 != null) {
+  //       if (instruction.register0 == novaInstrucao.register2) {
+  //         novaInstrucao.waitRegister = true;
+  //         station.waitingInstruction.add(novaInstrucao);
+  //         return true;
+  //       }
+  //     }
+  //   }
+
+  //   if (currentInstruction?.register0.state != StateRegister.none) {
+  //     return true;
+  //   }
+
+  //   if (currentInstruction?.register1 != null) {
+  //     if (currentInstruction?.register1?.state != StateRegister.none) {
+  //       return true;
+  //     }
+  //   }
+
+  //   if (currentInstruction?.register2 != null) {
+  //     if (currentInstruction?.register2?.state != StateRegister.none) {
+  //       return true;
+  //     }
+  //   }
+
+  //   return false;
+  // }
 
   // Ocupado = true
   // Não ocupado = false
@@ -58,32 +115,44 @@ class Station {
   }
 
   void carregaRegistradores(List<Registrador> registers, Station sta) {
-    currentInstruction?.register0.st = sta;
-
     if (currentInstruction!.opCode != OpCode.store) {
-      currentInstruction?.register0?.state = StateRegister.recording;
+      if (currentInstruction?.register0.state == StateRegister.none) {
+        currentInstruction?.register0.state = StateRegister.recording;
+        currentInstruction?.register0.st = sta;
+      }
 
       if (currentInstruction?.register1 != null) {
-        currentInstruction?.register1?.state = StateRegister.reading;
-        currentInstruction?.register1?.st = sta;
+        if (currentInstruction?.register1!.state == StateRegister.none) {
+          currentInstruction?.register1?.state = StateRegister.reading;
+          currentInstruction?.register1?.st = sta;
+        }
       }
 
       if (currentInstruction?.register2 != null) {
-        currentInstruction?.register2?.state = StateRegister.reading;
-        currentInstruction?.register2?.st = sta;
+        if (currentInstruction?.register2!.state == StateRegister.none) {
+          currentInstruction?.register2?.state = StateRegister.reading;
+          currentInstruction?.register2?.st = sta;
+        }
       }
     } else {
       // Store
-      currentInstruction?.register0?.state = StateRegister.reading;
+      if (currentInstruction?.register0.state == StateRegister.none) {
+        currentInstruction?.register0.state = StateRegister.reading;
+        currentInstruction?.register0.st = sta;
+      }
 
       if (currentInstruction?.register1 != null) {
-        currentInstruction?.register1?.state = StateRegister.reading;
-        currentInstruction?.register1?.st = sta;
+        if (currentInstruction?.register1!.state == StateRegister.none) {
+          currentInstruction?.register1?.state = StateRegister.reading;
+          currentInstruction?.register1?.st = sta;
+        }
       }
 
       if (currentInstruction?.register2 != null) {
-        currentInstruction?.register2?.state = StateRegister.recording;
-        currentInstruction?.register2?.st = sta;
+        if (currentInstruction?.register2!.state == StateRegister.none) {
+          currentInstruction?.register2?.state = StateRegister.recording;
+          currentInstruction?.register2?.st = sta;
+        }
       }
     }
   }
@@ -104,6 +173,8 @@ class Station {
   bool nextStep({
     required List<Registrador> registers,
     required int costs,
+    required Map<Registrador, double> regFake,
+    required List<Instruction> reOrderBuffer,
   }) {
     // if (currentInstruction != null) {
     //   //currentInstruction!.waitRegister! = true // Tem alguem utilizando o registrador
@@ -115,16 +186,74 @@ class Station {
     //     }
     //   }
 
-    if (currentInstruction!.waitRegister == false) {
-      if (cyclesLeft > 1) {
-        cyclesLeft--;
-      } else if (cyclesLeft == 1) {
-        print('Terminando instrução');
-        currentInstruction!.execute(registers: registers);
-        liberaRegistrador(registers);
-        currentInstruction = null;
+    if (cyclesLeft >= 1) {
+      cyclesLeft--;
+    } else if (cyclesLeft == 0) {
+      print('Terminando instrução');
+      currentInstruction!.execute(registers: registers, regFake: regFake);
+
+      if (currentInstruction!.opCode != OpCode.store) {
+        if (currentInstruction!.register1 != null &&
+            regFake.containsKey(currentInstruction!.register1)) {
+          // if (currentInstruction!.register0.state == StateRegister.reading ||
+          //     currentInstruction!.register0.state == StateRegister.none) {
+          if (currentInstruction!.dependenciaFalsa == true) {
+            currentInstruction!.register1!.valorRegistrador =
+                regFake[currentInstruction!.register1]!;
+            regFake.remove(currentInstruction!.register1);
+          }
+          // }
+        }
+        if (currentInstruction!.register2 != null &&
+            regFake.containsKey(currentInstruction!.register2)) {
+          // if (currentInstruction!.register0.state == StateRegister.reading ||
+          //     currentInstruction!.register0.state == StateRegister.none) {
+          if (currentInstruction!.dependenciaFalsa == true) {
+            currentInstruction!.register2!.valorRegistrador =
+                regFake[currentInstruction!.register2]!;
+            regFake.remove(currentInstruction!.register2);
+          }
+          // }
+        }
+
+        for (var element in currentInstruction!.register0.waitingInstruction) {
+          element.dependenciaVerdadeira = false;
+        }
+        currentInstruction!.register0.waitingInstruction.clear();
+      } else {
+        if (regFake.containsKey(currentInstruction!.register0)) {
+          // if (currentInstruction!.register2!.state == StateRegister.reading ||
+          //     currentInstruction!.register2!.state == StateRegister.none) {
+          if (currentInstruction!.dependenciaFalsa == true) {
+            currentInstruction!.register0.valorRegistrador =
+                regFake[currentInstruction!.register0]!;
+            regFake.remove(currentInstruction!.register0);
+          }
+          // }
+        }
+        if (currentInstruction!.register1 != null &&
+            regFake.containsKey(currentInstruction!.register1)) {
+          // if (currentInstruction!.register2!.state == StateRegister.reading ||
+          //     currentInstruction!.register2!.state == StateRegister.none) {
+          if (currentInstruction!.dependenciaFalsa == true) {
+            currentInstruction!.register1!.valorRegistrador =
+                regFake[currentInstruction!.register1]!;
+            regFake.remove(currentInstruction!.register1);
+          }
+          // }
+        }
+
+        for (var element in currentInstruction!.register2!.waitingInstruction) {
+          element.dependenciaVerdadeira = false;
+        }
+        currentInstruction!.register2!.waitingInstruction.clear();
       }
+
+      reOrderBuffer.remove(currentInstruction);
+      liberaRegistrador(registers);
+      currentInstruction = null;
     }
+
     // } else {
     //   return false;
     // }
@@ -138,12 +267,29 @@ class Station {
     // }
   }
 
-  void mostraRegistrador(Instruction i) {
-    if (i.register1 != null && i.register2 != null)
-      print("${i.opCode} R${i.register0}, R${i.register1}, R${i.register2};\n");
-    else if (i.register1 != null)
-      print("${i.opCode} R${i.register0}, R${i.register1}, ${i.value2};\n");
-    else
-      print("${i.opCode} R${i.register0}, ${i.value1}, R${i.register2};\n");
+  void mostraRegistrador(Instruction i, Map<Registrador, double> regFake) {
+    stdout.write("${i.opCode} ");
+
+    if (regFake.containsKey(i.register0) && i.opCode != OpCode.store) {
+      stdout.write("F${i.register0.id},");
+    } else {
+      stdout.write("R${i.register0.id},");
+    }
+
+    if (i.register1 != null) {
+      stdout.write(" R${i.register1!.id}, ");
+    } else {
+      stdout.write(" ${i.value1}, ");
+    }
+
+    if (regFake.containsKey(i.register2) && i.opCode == OpCode.store) {
+      stdout.write("F${i.register2!.id},\n\n");
+    } else {
+      if (i.register2 != null) {
+        stdout.write("R${i.register2!.id},\n\n");
+      } else {
+        stdout.write(" ${i.value2};\n\n");
+      }
+    }
   }
 }
