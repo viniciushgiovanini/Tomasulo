@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'enums.dart';
 import 'instruction.dart';
 import 'register.dart';
@@ -12,6 +10,7 @@ class Station {
   final List<OpCode> opCodes;
 
   int cyclesLeft = 0;
+  var started = true;
   Instruction? currentInstruction;
   List<Instruction> waitingInstruction = [];
 
@@ -22,7 +21,6 @@ class Station {
   void loadInstruction({
     required Instruction instruction,
     required int costs,
-    required List<Registrador> registers,
     required Station sta,
     required Map<Registrador, double> regFake,
   }) {
@@ -33,88 +31,20 @@ class Station {
       instruction.register2!.st = sta;
     }
 
+    // TODO: fix
     // if(instruction.register0)
     // currentInstruction!.waitRegister = verifyStateRegisters(registers);
     print("Carregando instrução: ");
-    mostraRegistrador(instruction, regFake);
+    instruction.mostraRegistrador(regFake);
     if (instruction.waitRegister == false) {
-      carregaRegistradores(registers, sta);
+      carregaRegistradores(sta);
     }
 
     cyclesLeft = costs;
-  }
-  //  bool verifyRegistradorFalso(List<Registrador> registers, Map<Registrador, double> regFake, Instruction instruction) {
-
-  //   if(instruction.opCode != OpCode.store){
-  //     if(regFake.containsKey(instruction.register0)){
-  //       instruction.register0.
-  //     }else{
-
-  //     }
-
-  //     if (instruction.register0 == novaInstrucao.register0) {
-  //       novaInstrucao.waitRegister = true;
-  //       station.waitingInstruction.add(novaInstrucao);
-  //       return true;
-  //     }
-  //     if (novaInstrucao.register1 != null) {
-  //       if (instruction.register0 == novaInstrucao.register1) {
-  //         novaInstrucao.waitRegister = true;
-  //         station.waitingInstruction.add(novaInstrucao);
-  //         return true;
-  //       }
-  //     }
-  //     if (novaInstrucao.register2 != null) {
-  //       if (instruction.register0 == novaInstrucao.register2) {
-  //         novaInstrucao.waitRegister = true;
-  //         station.waitingInstruction.add(novaInstrucao);
-  //         return true;
-  //       }
-  //     }
-  //   }
-
-  //   if (currentInstruction?.register0.state != StateRegister.none) {
-  //     return true;
-  //   }
-
-  //   if (currentInstruction?.register1 != null) {
-  //     if (currentInstruction?.register1?.state != StateRegister.none) {
-  //       return true;
-  //     }
-  //   }
-
-  //   if (currentInstruction?.register2 != null) {
-  //     if (currentInstruction?.register2?.state != StateRegister.none) {
-  //       return true;
-  //     }
-  //   }
-
-  //   return false;
-  // }
-
-  // Ocupado = true
-  // Não ocupado = false
-  bool verifyStateRegisters(List<Registrador> registers) {
-    if (currentInstruction?.register0.state != StateRegister.none) {
-      return true;
-    }
-
-    if (currentInstruction?.register1 != null) {
-      if (currentInstruction?.register1?.state != StateRegister.none) {
-        return true;
-      }
-    }
-
-    if (currentInstruction?.register2 != null) {
-      if (currentInstruction?.register2?.state != StateRegister.none) {
-        return true;
-      }
-    }
-
-    return false;
+    started = false;
   }
 
-  void carregaRegistradores(List<Registrador> registers, Station sta) {
+  void carregaRegistradores(Station sta) {
     if (currentInstruction!.opCode != OpCode.store) {
       if (currentInstruction?.register0.state == StateRegister.none) {
         currentInstruction?.register0.state = StateRegister.recording;
@@ -157,7 +87,7 @@ class Station {
     }
   }
 
-  void liberaRegistrador(List<Registrador> registers) {
+  void liberaRegistrador() {
     currentInstruction?.register0.state = StateRegister.none;
 
     if (currentInstruction?.register1 != null) {
@@ -172,25 +102,24 @@ class Station {
   // nextStep da propria station solo
   bool nextStep({
     required List<Registrador> registers,
-    required int costs,
     required Map<Registrador, double> regFake,
     required List<Instruction> reOrderBuffer,
   }) {
-    // if (currentInstruction != null) {
-    //   //currentInstruction!.waitRegister! = true // Tem alguem utilizando o registrador
-    //   //currentInstruction!.waitRegister! = false // Essa instrução esta utilizando os registradores
-    //   if (currentInstruction!.waitRegister!) {
-    //     currentInstruction!.waitRegister = verifyStateRegisters(registers);
-    //     if (currentInstruction!.waitRegister == false) {
-    //       loadInstruction(instruction: instruction, costs: costs, registers: registers)
-    //     }
-    //   }
+    if (!started) {
+      started = true;
+
+      print('executando');
+
+      if (currentInstruction != null) {
+        currentInstruction?.mostraRegistrador(regFake);
+      }
+    }
 
     if (cyclesLeft >= 1) {
       cyclesLeft--;
     } else if (cyclesLeft == 0) {
       print('Terminando instrução');
-      currentInstruction!.execute(registers: registers, regFake: regFake);
+      currentInstruction!.execute(regFake: regFake);
 
       if (currentInstruction!.opCode != OpCode.store) {
         if (currentInstruction!.register1 != null &&
@@ -250,46 +179,10 @@ class Station {
       }
 
       reOrderBuffer.remove(currentInstruction);
-      liberaRegistrador(registers);
+      liberaRegistrador();
       currentInstruction = null;
     }
 
-    // } else {
-    //   return false;
-    // }
-
     return true;
-    // if (cyclesLeft == 1) {
-    //   currentInstruction?.execute(registers: registers);
-    //   currentInstruction = null;
-    // } else {
-    //   cyclesLeft--;
-    // }
-  }
-
-  void mostraRegistrador(Instruction i, Map<Registrador, double> regFake) {
-    stdout.write("${i.opCode} ");
-
-    if (regFake.containsKey(i.register0) && i.opCode != OpCode.store) {
-      stdout.write("F${i.register0.id},");
-    } else {
-      stdout.write("R${i.register0.id},");
-    }
-
-    if (i.register1 != null) {
-      stdout.write(" R${i.register1!.id}, ");
-    } else {
-      stdout.write(" ${i.value1}, ");
-    }
-
-    if (regFake.containsKey(i.register2) && i.opCode == OpCode.store) {
-      stdout.write("F${i.register2!.id},\n\n");
-    } else {
-      if (i.register2 != null) {
-        stdout.write("R${i.register2!.id},\n\n");
-      } else {
-        stdout.write(" ${i.value2};\n\n");
-      }
-    }
   }
 }

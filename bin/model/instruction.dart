@@ -24,9 +24,9 @@ class Instruction {
 
   State state = State.ready;
 
-  void execute(
-      {required List<Registrador> registers,
-      required Map<Registrador, double> regFake}) {
+  void execute({
+    required Map<Registrador, double> regFake,
+  }) {
     // Colocar print dos resultados das ops.
     double operacao = 0;
 
@@ -151,18 +151,31 @@ class Instruction {
     }
   }
 
-  // int resolve({
-  //   required int? value,
-  //   required int? register,
-  // }) {
-  //   if (value != null) {
-  //     return value;
-  //   }
+  void mostraRegistrador(Map<Registrador, double> regFake) {
+    var t = '$opCode ';
 
-  //   if (register != null) {
-  //     return register;
-  //   }
+    if (regFake.containsKey(register0) && opCode != OpCode.store) {
+      t += 'F${register0.id},';
+    } else {
+      t += 'R${register0.id},';
+    }
 
-  //   throw StateError('Invalid operation arguments.');
-  // }
+    if (register1 != null) {
+      t += ' R${register1!.id}, ';
+    } else {
+      t += ' ${value1}, ';
+    }
+
+    if (regFake.containsKey(register2) && opCode == OpCode.store) {
+      t += 'F${register2!.id},\n';
+    } else {
+      if (register2 != null) {
+        t += 'R${register2!.id},\n';
+      } else {
+        t += ' ${value2};\n';
+      }
+    }
+
+    print(t);
+  }
 }

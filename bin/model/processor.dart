@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'enums.dart';
 import 'instruction.dart';
 import 'register.dart';
@@ -9,9 +7,9 @@ class Processor {
   Processor({
     required this.costs,
   });
+
   int n = 1;
   int ids = 0;
-  // List<StationGroup> listStations = new List.empty(growable: true);
   List<StationGroup> listStations = [];
   List<Instruction> reOrderBuffer = [];
   final List<Instruction> instructions = [];
@@ -22,33 +20,12 @@ class Processor {
     for (var i = 0; i < 22; i++) {
       t.add(new Registrador());
       t[i].id = i;
-      // t[i] = (new Registrador());
-      // t[i].id = i;
     }
 
     return t;
   })();
 
   final Map<Registrador, double> regFake = {};
-
-  // final Map<int, Tupla> registers = (() {
-  //   final t = <int, Tupla>{};
-
-  //   for (var i = 0; i < 22; i++) {
-  //     t[i] = (new Tupla());
-  //   }
-
-  //   return t;
-  // })();
-  // final Map<int, Tupla> fakeRegisters = (() {
-  //   final t = <int, Tupla>{};
-
-  //   for (var i = 0; i < 10; i++) {
-  //     t[i] = (new Tupla());
-  //   }
-
-  //   return t;
-  // })();
 
   void criarEstacoes({
     required List<OpCode> opCode,
@@ -90,7 +67,7 @@ class Processor {
   }
 
   bool nextStep() {
-    print("\n Ciclo ${n++} \n\n");
+    print(">> Ciclo ${n++}\n");
 
     for (var stationGroup in listStations) {
       stationGroup.nextStep(
@@ -118,11 +95,4 @@ class Processor {
 
     return reOrderBuffer.length > 0;
   }
-
-  // @override
-  // String toString() {
-  //   return registers.values
-  //       .map((value) => value.valorRegistrador.toStringAsFixed(0))
-  //       .join(' ');
-  // }
 }
