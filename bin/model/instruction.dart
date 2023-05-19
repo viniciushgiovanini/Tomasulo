@@ -1,11 +1,16 @@
+import 'dart:ffi';
+
 import 'enums.dart';
 import 'register.dart';
 
 class Instruction {
   Instruction({
     required this.opCode,
+    required this.registerName0,
     required this.register0,
+    this.registerName1,
     this.register1,
+    this.registerName2,
     this.register2,
     this.value1,
     this.value2,
@@ -13,8 +18,11 @@ class Instruction {
 
   int id = -1;
   final OpCode opCode;
+  final String registerName0;
   final Registrador register0;
+  final String? registerName1;
   final Registrador? register1;
+  final String? registerName2;
   final Registrador? register2;
   final double? value1;
   final double? value2;
@@ -67,10 +75,10 @@ class Instruction {
           print("Valor de R${register0.id} ${operacao}\n");
           break; // SW R1, 0(R2);
         case OpCode.store:
-          operacao = register0.valorRegistrador;
+          operacao = register2!.valorRegistrador;
 
-          print("SW R${register0.id}, R${register1!.id}, R${register2!.id};");
-          print("Valor de R${register2!.id} ${operacao}\n");
+          print("SW R${register2!.id}, R${register1!.id}, R${register0.id};");
+          print("Valor de R${register0.id} ${operacao}\n");
           break;
       }
     } else if (register1 != null) {
@@ -132,45 +140,73 @@ class Instruction {
           print("Valor de R${register0.id} ${operacao}\n");
           break; // SW R1, 0(R2);
         case OpCode.store:
-          operacao = register0.valorRegistrador;
+          operacao = register2!.valorRegistrador;
 
-          print("SW R${register0.id}, ${value1}, R${register2!.id};");
-          print("Valor de R${register2!.id} ${operacao}\n");
+          print("SW R${register2!.id}, ${value1}, R${register0.id};");
+          print("Valor de R${register0.id} ${operacao}\n");
           break;
       }
     }
 
-    if (!regFake.containsKey(register0) && opCode != OpCode.store) {
+    if (!regFake.containsKey(register0)) {
       register0.valorRegistrador = operacao;
-    } else if (opCode != OpCode.store) {
-      regFake[register0] = operacao;
-    } else if (regFake.containsKey(register2)) {
-      register2!.valorRegistrador = operacao;
     } else {
-      regFake[register2!] = operacao;
+      regFake[register0] = operacao;
     }
   }
 
-  void mostraRegistrador(Map<Registrador, double> regFake) {
+  void mostraRegistrador(
+      {required Map<Registrador, double> regFake,
+      required int quantRegPontoFlutuante}) {
     var t = '$opCode ';
+    var calculo0 = 0;
+    var calculo1 = 0;
+    var calculo2 = 0;
 
-    if (regFake.containsKey(register0) && opCode != OpCode.store) {
-      t += 'F${register0.id},';
+    if (registerName0 == 'F') {
+      calculo0 = register0.id - quantRegPontoFlutuante;
     } else {
-      t += 'R${register0.id},';
+      calculo0 = register0.id;
+    }
+    if (register1 != null) {
+      if (registerName1 == 'F') {
+        calculo1 = register1!.id - quantRegPontoFlutuante;
+      } else {
+        calculo1 = register1!.id;
+      }
+    }
+    if (register2 != null) {
+      if (registerName2 == 'F') {
+        calculo2 = register2!.id - quantRegPontoFlutuante;
+      } else {
+        calculo2 = register2!.id;
+      }
+    }
+
+    if (opCode != OpCode.store && regFake.containsKey(register0)) {
+      t += '${registerName0}K${calculo0},';
+    } else if (opCode != OpCode.store) {
+      t += '${registerName0}${calculo0},';
+    } /*else if(regFake.containsKey(register2)){
+      t += 'R${register2!.id},';
+    }*/
+    else {
+      t += '${registerName2}${calculo2},';
     }
 
     if (register1 != null) {
-      t += ' R${register1!.id}, ';
+      t += ' ${registerName1}${calculo1}, ';
     } else {
       t += ' ${value1}, ';
     }
 
-    if (regFake.containsKey(register2) && opCode == OpCode.store) {
-      t += 'F${register2!.id},\n';
+    if (opCode == OpCode.store && regFake.containsKey(register0)) {
+      t += '${registerName0}K${calculo0},\n';
+    } else if (opCode == OpCode.store) {
+      t += '${registerName0}${calculo0},\n';
     } else {
       if (register2 != null) {
-        t += 'R${register2!.id},\n';
+        t += '${registerName2}${calculo2},\n';
       } else {
         t += ' ${value2};\n';
       }

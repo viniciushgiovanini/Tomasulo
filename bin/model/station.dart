@@ -24,16 +24,19 @@ class Station {
     required int costs,
     required Station sta,
     required Map<Registrador, double> regFake,
+    required int quantRegPontoFlutuante,
   }) {
     currentInstruction = instruction;
-    if (instruction.opCode != OpCode.store) {
-      instruction.register0.st = sta;
-    } else {
-      instruction.register2!.st = sta;
-    }
-    if (instruction.dependenciaVerdadeira == false) {
-      carregadaInicial(instruction: instruction, regFake: regFake);
-    }
+
+    instruction.register0.st = sta;
+
+    // if (instruction.dependenciaVerdadeira == false) {
+    carregadaInicial(
+      instruction: instruction,
+      regFake: regFake,
+      quantRegPontoFlutuante: quantRegPontoFlutuante,
+    );
+    // }
     // TODO: fix
     // if(instruction.register0)
     // currentInstruction!.waitRegister = verifyStateRegisters(registers);
@@ -43,62 +46,47 @@ class Station {
     }
 
     cyclesLeft = costs;
-    started = false;
+    if (instruction.dependenciaVerdadeira == false) {
+      started = false;
+    }
   }
 
   void carregadaInicial({
     required Instruction instruction,
     required Map<Registrador, double> regFake,
+    required int quantRegPontoFlutuante,
   }) {
     print("Carregando instrução: ");
-    instruction.mostraRegistrador(regFake);
+    instruction.mostraRegistrador(
+      regFake: regFake,
+      quantRegPontoFlutuante: quantRegPontoFlutuante,
+    );
   }
 
   void carregaRegistradores(Station sta) {
-    if (currentInstruction!.opCode != OpCode.store) {
-      if (currentInstruction?.register0.state == StateRegister.none) {
-        currentInstruction?.register0.state = StateRegister.recording;
-        currentInstruction?.register0.st = sta;
-      }
+    if (currentInstruction?.register0.state == StateRegister.none) {
+      currentInstruction?.register0.state = StateRegister.recording;
+      currentInstruction?.register0.st = sta;
+    }
 
-      if (currentInstruction?.register1 != null) {
-        if (currentInstruction?.register1!.state == StateRegister.none) {
-          currentInstruction?.register1?.state = StateRegister.reading;
-          currentInstruction?.register1?.st = sta;
-        }
+    if (currentInstruction?.register1 != null) {
+      if (currentInstruction?.register1!.state == StateRegister.none) {
+        currentInstruction?.register1?.state = StateRegister.reading;
+        currentInstruction?.register1?.st = sta;
       }
+    }
 
-      if (currentInstruction?.register2 != null) {
-        if (currentInstruction?.register2!.state == StateRegister.none) {
-          currentInstruction?.register2?.state = StateRegister.reading;
-          currentInstruction?.register2?.st = sta;
-        }
-      }
-    } else {
-      // Store
-      if (currentInstruction?.register0.state == StateRegister.none) {
-        currentInstruction?.register0.state = StateRegister.reading;
-        currentInstruction?.register0.st = sta;
-      }
-
-      if (currentInstruction?.register1 != null) {
-        if (currentInstruction?.register1!.state == StateRegister.none) {
-          currentInstruction?.register1?.state = StateRegister.reading;
-          currentInstruction?.register1?.st = sta;
-        }
-      }
-
-      if (currentInstruction?.register2 != null) {
-        if (currentInstruction?.register2!.state == StateRegister.none) {
-          currentInstruction?.register2?.state = StateRegister.recording;
-          currentInstruction?.register2?.st = sta;
-        }
+    if (currentInstruction?.register2 != null) {
+      if (currentInstruction?.register2!.state == StateRegister.none) {
+        currentInstruction?.register2?.state = StateRegister.reading;
+        currentInstruction?.register2?.st = sta;
       }
     }
   }
 
   void liberaRegistrador() {
     currentInstruction?.register0.state = StateRegister.none;
+    currentInstruction!.register0.st = null;
 
     if (currentInstruction?.register1 != null) {
       currentInstruction?.register1?.state = StateRegister.none;
@@ -114,96 +102,65 @@ class Station {
     required List<Registrador> registers,
     required Map<Registrador, double> regFake,
     required List<Instruction> reOrderBuffer,
+    required int quantRegPontoFlutuante,
   }) {
     if (!started) {
       started = true;
-
-      print('executando');
-
-      // if (currentInstruction != null) {
-      currentInstruction?.mostraRegistrador(regFake);
-      // }
+      taExecutandoEM(
+        regFake: regFake,
+        quantRegPontoFlutuante: quantRegPontoFlutuante,
+      );
     }
 
     if (cyclesLeft >= 1) {
       cyclesLeft--;
     } else if (cyclesLeft == 0) {
-      print('Terminando instrução');
+      print('Terminando instrução:');
       currentInstruction!.execute(regFake: regFake);
 
-      if (currentInstruction!.opCode != OpCode.store) {
-        if (regFake.containsKey(currentInstruction!.register0)) {
-          // if (currentInstruction!.register2!.state == StateRegister.reading ||
-          //     currentInstruction!.register2!.state == StateRegister.none) {
-          if (currentInstruction!.dependenciaFalsa == true) {
-            currentInstruction!.register0.valorRegistrador =
-                regFake[currentInstruction!.register0]!;
-            regFake.remove(currentInstruction!.register0);
-          }
-          // }
+      if (regFake.containsKey(currentInstruction!.register0)) {
+        // if (currentInstruction!.register2!.state == StateRegister.reading ||
+        //     currentInstruction!.register2!.state == StateRegister.none) {
+        if (currentInstruction!.dependenciaFalsa == true) {
+          currentInstruction!.register0.valorRegistrador =
+              regFake[currentInstruction!.register0]!;
+          regFake.remove(currentInstruction!.register0);
         }
-
-        if (currentInstruction!.register1 != null &&
-            regFake.containsKey(currentInstruction!.register1)) {
-          // if (currentInstruction!.register0.state == StateRegister.reading ||
-          //     currentInstruction!.register0.state == StateRegister.none) {
-          if (currentInstruction!.dependenciaFalsa == true) {
-            currentInstruction!.register1!.valorRegistrador =
-                regFake[currentInstruction!.register1]!;
-            regFake.remove(currentInstruction!.register1);
-          }
-          // }
-        }
-        if (currentInstruction!.register2 != null &&
-            regFake.containsKey(currentInstruction!.register2)) {
-          // if (currentInstruction!.register0.state == StateRegister.reading ||
-          //     currentInstruction!.register0.state == StateRegister.none) {
-          if (currentInstruction!.dependenciaFalsa == true) {
-            currentInstruction!.register2!.valorRegistrador =
-                regFake[currentInstruction!.register2]!;
-            regFake.remove(currentInstruction!.register2);
-          }
-          // }
-        }
-
-        for (var element in currentInstruction!.register0.waitingInstruction) {
-          element.dependenciaVerdadeira = false;
-          element.register0.st!
-              .carregadaInicial(instruction: element, regFake: regFake);
-          element.register0.st!.cyclesLeft--;
-        }
-        currentInstruction!.register0.waitingInstruction.clear();
-      } else {
-        if (regFake.containsKey(currentInstruction!.register0)) {
-          // if (currentInstruction!.register2!.state == StateRegister.reading ||
-          //     currentInstruction!.register2!.state == StateRegister.none) {
-          if (currentInstruction!.dependenciaFalsa == true) {
-            currentInstruction!.register0.valorRegistrador =
-                regFake[currentInstruction!.register0]!;
-            regFake.remove(currentInstruction!.register0);
-          }
-          // }
-        }
-        if (currentInstruction!.register1 != null &&
-            regFake.containsKey(currentInstruction!.register1)) {
-          // if (currentInstruction!.register2!.state == StateRegister.reading ||
-          //     currentInstruction!.register2!.state == StateRegister.none) {
-          if (currentInstruction!.dependenciaFalsa == true) {
-            currentInstruction!.register1!.valorRegistrador =
-                regFake[currentInstruction!.register1]!;
-            regFake.remove(currentInstruction!.register1);
-          }
-          // }
-        }
-
-        for (var element in currentInstruction!.register2!.waitingInstruction) {
-          element.dependenciaVerdadeira = false;
-          element.register2!.st!
-              .carregadaInicial(instruction: element, regFake: regFake);
-          element.register2!.st!.cyclesLeft--;
-        }
-        currentInstruction!.register2!.waitingInstruction.clear();
+        // }
       }
+
+      if (currentInstruction!.register1 != null &&
+          regFake.containsKey(currentInstruction!.register1)) {
+        // if (currentInstruction!.register0.state == StateRegister.reading ||
+        //     currentInstruction!.register0.state == StateRegister.none) {
+        if (currentInstruction!.dependenciaFalsa == true) {
+          currentInstruction!.register1!.valorRegistrador =
+              regFake[currentInstruction!.register1]!;
+          regFake.remove(currentInstruction!.register1);
+        }
+        // }
+      }
+      if (currentInstruction!.register2 != null &&
+          regFake.containsKey(currentInstruction!.register2)) {
+        // if (currentInstruction!.register0.state == StateRegister.reading ||
+        //     currentInstruction!.register0.state == StateRegister.none) {
+        if (currentInstruction!.dependenciaFalsa == true) {
+          currentInstruction!.register2!.valorRegistrador =
+              regFake[currentInstruction!.register2]!;
+          regFake.remove(currentInstruction!.register2);
+        }
+        // }
+      }
+
+      for (var element in currentInstruction!.register0.waitingInstruction) {
+        element.dependenciaVerdadeira = false;
+        element.register0.st!.cyclesLeft--;
+        element.register0.st!.taExecutandoEM(
+          regFake: regFake,
+          quantRegPontoFlutuante: quantRegPontoFlutuante,
+        );
+      }
+      currentInstruction!.register0.waitingInstruction.clear();
 
       reOrderBuffer.remove(currentInstruction);
       liberaRegistrador();
@@ -211,5 +168,19 @@ class Station {
     }
 
     return true;
+  }
+
+  void taExecutandoEM({
+    required Map<Registrador, double> regFake,
+    required int quantRegPontoFlutuante,
+  }) {
+    print('Executando:');
+
+    // if (currentInstruction != null) {
+    currentInstruction?.mostraRegistrador(
+      regFake: regFake,
+      quantRegPontoFlutuante: quantRegPontoFlutuante,
+    );
+    // }
   }
 }

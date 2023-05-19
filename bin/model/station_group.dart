@@ -24,14 +24,18 @@ class StationGroup {
     required List<Registrador> registers,
     required Map<Registrador, double> regFake,
     required List<Instruction> reOrderBuffer,
+    required int quantRegPontoFlutuante,
     Station? sta,
   }) {
     var retorno = false;
 
     if (instruction != null) {
-      print('issuing');
+      print('Pronto para executar:');
 
-      instruction.mostraRegistrador(regFake);
+      instruction.mostraRegistrador(
+        regFake: regFake,
+        quantRegPontoFlutuante: quantRegPontoFlutuante,
+      );
 
       instrucoes.add(instruction);
     }
@@ -45,19 +49,23 @@ class StationGroup {
     if (sta != null) {
       // if (sta.currentInstruction == null) {
       podeColocar(
-          reOrderBuffer: reOrderBuffer,
-          regFake: regFake,
-          registers: registers,
-          sta: sta);
+        reOrderBuffer: reOrderBuffer,
+        regFake: regFake,
+        registers: registers,
+        sta: sta,
+        quantRegPontoFlutuante: quantRegPontoFlutuante,
+      );
       // }
     } else {
       for (var element in stations) {
         if (element.currentInstruction == null) {
           if (podeColocar(
-                  reOrderBuffer: reOrderBuffer,
-                  regFake: regFake,
-                  registers: registers,
-                  sta: element) ==
+                reOrderBuffer: reOrderBuffer,
+                regFake: regFake,
+                registers: registers,
+                sta: element,
+                quantRegPontoFlutuante: quantRegPontoFlutuante,
+              ) ==
               false) {
             // false = não ocupado
             break;
@@ -74,6 +82,7 @@ class StationGroup {
     required Map<Registrador, double> regFake,
     required List<Instruction> reOrderBuffer,
     required Station sta,
+    required int quantRegPontoFlutuante,
   }) {
     if (instrucoes.length > 0) {
       int posicao = pesquisaInstrucao(
@@ -100,7 +109,8 @@ class StationGroup {
           instruction: instrucoes[0],
           costs: costs[instrucoes[0].opCode]!,
           sta: sta,
-          regFake: regFake);
+          regFake: regFake,
+          quantRegPontoFlutuante: quantRegPontoFlutuante);
       instrucoes.remove(instrucoes[0]);
       return true;
     }
@@ -146,14 +156,17 @@ class StationGroup {
     required List<Registrador> registers,
     required List<Instruction> reOrderBuffer,
     required Map<Registrador, double> regFake,
+    required int quantRegPontoFlutuante,
   }) {
     for (var element in stations) {
       if (element.currentInstruction != null) {
         if (element.currentInstruction!.dependenciaVerdadeira == false) {
           element.nextStep(
-              registers: registers,
-              regFake: regFake,
-              reOrderBuffer: reOrderBuffer);
+            registers: registers,
+            regFake: regFake,
+            reOrderBuffer: reOrderBuffer,
+            quantRegPontoFlutuante: quantRegPontoFlutuante,
+          );
         }
       } else {
         loadInstruction(
@@ -161,6 +174,7 @@ class StationGroup {
           regFake: regFake,
           reOrderBuffer: reOrderBuffer,
           sta: element,
+          quantRegPontoFlutuante: quantRegPontoFlutuante,
         );
       }
     }
@@ -195,40 +209,18 @@ class StationGroup {
     Instruction instruction,
     Instruction novaInstrucao,
   ) {
-    if (instruction.opCode != OpCode.store) {
-      if (novaInstrucao.register1 != null) {
-        if (instruction.register0 == novaInstrucao.register1) {
-          instruction.waitRegister = true;
-          instruction.register0.waitingInstruction.add(novaInstrucao);
-          return true;
-        }
-      }
-      if (novaInstrucao.register2 != null) {
-        if (instruction.register0 == novaInstrucao.register2) {
-          instruction.waitRegister = true;
-          instruction.register0.waitingInstruction.add(novaInstrucao);
-          return true;
-        }
-      }
-    } else {
-      if (instruction.register2 == novaInstrucao.register0) {
+    if (novaInstrucao.register1 != null) {
+      if (instruction.register0 == novaInstrucao.register1) {
         instruction.waitRegister = true;
-        instruction.register2!.waitingInstruction.add(novaInstrucao);
+        instruction.register0.waitingInstruction.add(novaInstrucao);
         return true;
       }
-      if (novaInstrucao.register1 != null) {
-        if (instruction.register2 == novaInstrucao.register1) {
-          instruction.waitRegister = true;
-          instruction.register2!.waitingInstruction.add(novaInstrucao);
-          return true;
-        }
-      }
-      if (novaInstrucao.register2 != null) {
-        if (instruction.register2 == novaInstrucao.register2) {
-          instruction.waitRegister = true;
-          instruction.register2!.waitingInstruction.add(novaInstrucao);
-          return true;
-        }
+    }
+    if (novaInstrucao.register2 != null) {
+      if (instruction.register0 == novaInstrucao.register2) {
+        instruction.waitRegister = true;
+        instruction.register0.waitingInstruction.add(novaInstrucao);
+        return true;
       }
     }
 
@@ -243,6 +235,13 @@ class StationGroup {
     Instruction novaInstrucao,
     Map<Registrador, double> regFake,
   ) {
+    if (instruction.register0 == novaInstrucao.register0) {
+      regFake[instruction.register0] = instruction.register0.valorRegistrador;
+      instruction.waitRegister = true;
+      instruction.dependenciaFalsa = true;
+      return true;
+    }
+
     if (instruction.register1 != null) {
       if (instruction.register1 == novaInstrucao.register0) {
         regFake[instruction.register1!] =
@@ -253,36 +252,10 @@ class StationGroup {
       }
     }
 
-    if (instruction.opCode != OpCode.store &&
-        novaInstrucao.opCode != OpCode.store) {
-      if (instruction.register0 == novaInstrucao.register0) {
-        regFake[instruction.register0] = instruction.register0.valorRegistrador;
-        instruction.waitRegister = true;
-        instruction.dependenciaFalsa = true;
-        return true;
-      }
-
-      if (instruction.register2 != null) {
-        if (instruction.register2 == novaInstrucao.register0) {
-          regFake[instruction.register2!] =
-              instruction.register2!.valorRegistrador;
-          instruction.waitRegister = true;
-          instruction.dependenciaFalsa = true;
-          return true;
-        }
-      }
-    } else if (novaInstrucao.opCode != OpCode.store) {
-      if (instruction.register0 == novaInstrucao.register0) {
-        regFake[instruction.register0] = instruction.register0.valorRegistrador;
-        instruction.waitRegister = true;
-        instruction.dependenciaFalsa = true;
-        return true;
-      }
-
-      // TODO: fix
-    } else /*if(instruction.opCode != OpCode.store)*/ {
-      if (instruction.register0 == novaInstrucao.register2) {
-        regFake[instruction.register0] = instruction.register0.valorRegistrador;
+    if (instruction.register2 != null) {
+      if (instruction.register2 == novaInstrucao.register0) {
+        regFake[instruction.register2!] =
+            instruction.register2!.valorRegistrador;
         instruction.waitRegister = true;
         instruction.dependenciaFalsa = true;
         return true;
