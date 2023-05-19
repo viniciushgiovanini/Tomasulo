@@ -5,10 +5,11 @@ import 'register.dart';
 class Station {
   Station({
     required this.opCodes,
+    required this.id,
   });
 
   final List<OpCode> opCodes;
-
+  int id;
   int cyclesLeft = 0;
   var started = true;
   Instruction? currentInstruction;
@@ -30,18 +31,27 @@ class Station {
     } else {
       instruction.register2!.st = sta;
     }
-
+    if (instruction.dependenciaVerdadeira == false) {
+      carregadaInicial(instruction: instruction, regFake: regFake);
+    }
     // TODO: fix
     // if(instruction.register0)
     // currentInstruction!.waitRegister = verifyStateRegisters(registers);
-    print("Carregando instrução: ");
-    instruction.mostraRegistrador(regFake);
+
     if (instruction.waitRegister == false) {
       carregaRegistradores(sta);
     }
 
     cyclesLeft = costs;
     started = false;
+  }
+
+  void carregadaInicial({
+    required Instruction instruction,
+    required Map<Registrador, double> regFake,
+  }) {
+    print("Carregando instrução: ");
+    instruction.mostraRegistrador(regFake);
   }
 
   void carregaRegistradores(Station sta) {
@@ -110,9 +120,9 @@ class Station {
 
       print('executando');
 
-      if (currentInstruction != null) {
-        currentInstruction?.mostraRegistrador(regFake);
-      }
+      // if (currentInstruction != null) {
+      currentInstruction?.mostraRegistrador(regFake);
+      // }
     }
 
     if (cyclesLeft >= 1) {
@@ -122,6 +132,17 @@ class Station {
       currentInstruction!.execute(regFake: regFake);
 
       if (currentInstruction!.opCode != OpCode.store) {
+        if (regFake.containsKey(currentInstruction!.register0)) {
+          // if (currentInstruction!.register2!.state == StateRegister.reading ||
+          //     currentInstruction!.register2!.state == StateRegister.none) {
+          if (currentInstruction!.dependenciaFalsa == true) {
+            currentInstruction!.register0.valorRegistrador =
+                regFake[currentInstruction!.register0]!;
+            regFake.remove(currentInstruction!.register0);
+          }
+          // }
+        }
+
         if (currentInstruction!.register1 != null &&
             regFake.containsKey(currentInstruction!.register1)) {
           // if (currentInstruction!.register0.state == StateRegister.reading ||
@@ -147,6 +168,9 @@ class Station {
 
         for (var element in currentInstruction!.register0.waitingInstruction) {
           element.dependenciaVerdadeira = false;
+          element.register0.st!
+              .carregadaInicial(instruction: element, regFake: regFake);
+          element.register0.st!.cyclesLeft--;
         }
         currentInstruction!.register0.waitingInstruction.clear();
       } else {
@@ -174,6 +198,9 @@ class Station {
 
         for (var element in currentInstruction!.register2!.waitingInstruction) {
           element.dependenciaVerdadeira = false;
+          element.register2!.st!
+              .carregadaInicial(instruction: element, regFake: regFake);
+          element.register2!.st!.cyclesLeft--;
         }
         currentInstruction!.register2!.waitingInstruction.clear();
       }

@@ -45,24 +45,40 @@ class Processor {
     double? value1,
     double? value2,
   }) {
-    if (register1 != null && register2 != null)
-      instructions.add(Instruction(
-          opCode: opCode,
-          register0: reg[register0],
-          register1: reg[register1],
-          register2: reg[register2]));
-    else if (register1 != null) {
-      instructions.add(Instruction(
-          opCode: opCode,
-          register0: reg[register0],
-          register1: reg[register1],
-          value2: value2));
+    if (opCode != OpCode.store) {
+      if (register1 != null && register2 != null)
+        instructions.add(Instruction(
+            opCode: opCode,
+            register0: reg[register0],
+            register1: reg[register1],
+            register2: reg[register2]));
+      else if (register1 != null) {
+        instructions.add(Instruction(
+            opCode: opCode,
+            register0: reg[register0],
+            register1: reg[register1],
+            value2: value2));
+      } else {
+        instructions.add(Instruction(
+            opCode: opCode,
+            register0: reg[register0],
+            value1: value1,
+            register2: reg[register2]));
+      }
     } else {
-      instructions.add(Instruction(
-          opCode: opCode,
-          register0: reg[register0],
-          value1: value1,
-          register2: reg[register2]));
+      if (register1 != null)
+        instructions.add(Instruction(
+            opCode: opCode,
+            register0: reg[register2],
+            register1: reg[register1],
+            register2: reg[register0]));
+      else {
+        instructions.add(Instruction(
+            opCode: opCode,
+            register0: reg[register2],
+            value1: value1,
+            register2: reg[register0]));
+      }
     }
   }
 
