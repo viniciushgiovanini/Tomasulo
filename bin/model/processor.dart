@@ -16,7 +16,9 @@ class Processor {
   final Map<OpCode, int> costs;
   final List<Registrador> reg = List.generate(
     quantRegTotal,
-    (index) => new Registrador(id: index),
+    (index) => new Registrador(
+      id: index,
+    ),
   );
 
   final Map<Registrador, double> regFake = {};
@@ -70,6 +72,9 @@ class Processor {
       value1: value1,
       value2: value2,
     );
+    var original0 = register0;
+    var original1 = register1;
+    var original2 = register2;
 
     if (registerName0 == 'F') {
       register0 += quantRegNormal;
@@ -86,7 +91,10 @@ class Processor {
     }
 
     if (opCode != OpCode.store) {
-      if (register1 != null && register2 != null)
+      if (register1 != null && register2 != null) {
+        reg[register0].idOriginal = original0;
+        reg[register1].idOriginal = original1!;
+        reg[register2].idOriginal = original2!;
         instructions.add(
           Instruction(
             opCode: opCode,
@@ -98,7 +106,9 @@ class Processor {
             registerName2: registerName2,
           ),
         );
-      else if (register1 != null) {
+      } else if (register1 != null) {
+        reg[register0].idOriginal = original0;
+        reg[register1].idOriginal = original1!;
         instructions.add(
           Instruction(
             opCode: opCode,
@@ -110,13 +120,15 @@ class Processor {
           ),
         );
       } else {
+        reg[register0].idOriginal = original0;
+        reg[register2!].idOriginal = original2!;
         instructions.add(
           Instruction(
             opCode: opCode,
             register0: reg[register0],
             registerName0: registerName0,
             value1: value1,
-            register2: reg[register2!],
+            register2: reg[register2],
             registerName2: registerName2,
           ),
         );

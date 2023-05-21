@@ -40,20 +40,26 @@ class Instruction {
         case OpCode.add:
           operacao = register1!.valorRegistrador + register2!.valorRegistrador;
 
-          print("ADD R${register0.id}, R${register1!.id}, R${register2!.id};");
-          print("Valor de R${register0.id}: ${operacao}\n");
+          print(
+              "ADD ${registerName0}${register0.idOriginal}, ${registerName1}${register1!.idOriginal}, ${registerName2}${register2!.idOriginal};");
+          print(
+              "Valor de ${registerName0}${register0.idOriginal}: ${operacao}\n");
           break;
         case OpCode.sub:
           operacao = register1!.valorRegistrador - register2!.valorRegistrador;
 
-          print("SUB R${register0.id}, R${register1!.id}, R${register2!.id};");
-          print("Valor de R${register0.id} ${operacao}\n");
+          print(
+              "SUB ${registerName0}${register0.idOriginal}, ${registerName1}${register1!.idOriginal}, ${registerName2}${register2!.idOriginal};");
+          print(
+              "Valor de ${registerName0}${register0.idOriginal} ${operacao}\n");
           break;
         case OpCode.mul:
           operacao = register1!.valorRegistrador * register2!.valorRegistrador;
 
-          print("MUL R${register0.id}, R${register1!.id}, R${register2!.id};");
-          print("Valor de R${register0.id} ${operacao}\n");
+          print(
+              "MUL ${registerName0}${register0.idOriginal}, ${registerName1}${register1!.idOriginal}, ${registerName2}${register2!.idOriginal};");
+          print(
+              "Valor de ${registerName0}${register0.idOriginal} ${operacao}\n");
 
           break;
         case OpCode.div:
@@ -61,20 +67,26 @@ class Instruction {
             operacao =
                 register1!.valorRegistrador / register2!.valorRegistrador;
 
-          print("DIV R${register0.id}, R${register1!.id}, R${register2!.id};");
-          print("Valor de R${register0.id} ${operacao}\n");
+          print(
+              "DIV ${registerName0}${register0.idOriginal}, ${registerName1}${register1!.idOriginal}, ${registerName2}${register2!.idOriginal};");
+          print(
+              "Valor de ${registerName0}${register0.idOriginal} ${operacao}\n");
           break;
         case OpCode.load:
           operacao = register2!.valorRegistrador;
 
-          print("LW R${register0.id}, R${register1!.id}, R${register2!.id};");
-          print("Valor de R${register0.id} ${operacao}\n");
+          print(
+              "LW ${registerName0}${register0.idOriginal}, ${registerName1}${register1!.idOriginal}, ${registerName2}${register2!.idOriginal};");
+          print(
+              "Valor de ${registerName0}${register0.idOriginal} ${operacao}\n");
           break; // SW R1, 0(R2);
         case OpCode.store:
           operacao = register2!.valorRegistrador;
 
-          print("SW R${register2!.id}, R${register1!.id}, R${register0.id};");
-          print("Valor de R${register0.id} ${operacao}\n");
+          print(
+              "SW ${registerName2}${register2!.idOriginal}, ${registerName1}${register1!.idOriginal}, ${registerName0}${register0.idOriginal};");
+          print(
+              "Valor de ${registerName0}${register0.idOriginal} ${operacao}\n");
           break;
       }
     } else if (register1 != null) {
@@ -83,28 +95,36 @@ class Instruction {
         case OpCode.add:
           operacao = register1!.valorRegistrador + value2!;
 
-          print("ADD R${register0.id}, R${register1!.id}, ${value2};");
-          print("Valor de R${register0.id}: ${operacao}\n");
+          print(
+              "ADD ${registerName0}${register0.idOriginal}, ${registerName1}${register1!.idOriginal}, ${value2};");
+          print(
+              "Valor de ${registerName0}${register0.idOriginal}: ${operacao}\n");
           break;
         case OpCode.sub:
           operacao = register1!.valorRegistrador - value2!;
 
-          print("SUB R${register0.id}, R${register1!.id}, ${value2};");
-          print("Valor de R${register0.id} ${operacao}\n");
+          print(
+              "SUB ${registerName0}${register0.idOriginal}, ${registerName1}${register1!.idOriginal}, ${value2};");
+          print(
+              "Valor de ${registerName0}${register0.idOriginal} ${operacao}\n");
           break;
         case OpCode.mul:
           operacao = register1!.valorRegistrador * value2!;
 
-          print("MUL R${register0.id}, R${register1!.id}, ${value2};");
-          print("Valor de R${register0.id} ${operacao}\n");
+          print(
+              "MUL ${registerName0}${register0.idOriginal}, ${registerName1}${register1!.idOriginal}, ${value2};");
+          print(
+              "Valor de ${registerName0}${register0.idOriginal} ${operacao}\n");
 
           break;
         case OpCode.div:
           if (value2 != 0) {
             operacao = register1!.valorRegistrador / value2!;
 
-            print("DIV R${register0.id}, R${register1!.id}, ${value2};");
-            print("Valor de R${register0.id} ${operacao}\n");
+            print(
+                "DIV ${registerName0}${register0.idOriginal}, ${registerName1}${register1!.idOriginal}, ${value2};");
+            print(
+                "Valor de ${registerName0}${register0.idOriginal} ${operacao}\n");
           }
           break;
         case OpCode.load:
@@ -132,14 +152,18 @@ class Instruction {
         case OpCode.load:
           operacao = register2!.valorRegistrador;
 
-          print("LW R${register0.id}, ${value1}, R${register2!.id};");
-          print("Valor de R${register0.id} ${operacao}\n");
+          print(
+              "LW ${registerName0}${register0.idOriginal}, ${value1}, ${registerName2}${register2!.idOriginal};");
+          print(
+              "Valor de ${registerName0}${register0.idOriginal} ${operacao}\n");
           break; // SW R1, 0(R2);
         case OpCode.store:
           operacao = register2!.valorRegistrador;
 
-          print("SW R${register2!.id}, ${value1}, R${register0.id};");
-          print("Valor de R${register0.id} ${operacao}\n");
+          print(
+              "SW ${registerName2}${register2!.idOriginal}, ${value1}, ${registerName0}${register0.idOriginal};");
+          print(
+              "Valor de ${registerName0}${register0.idOriginal} ${operacao}\n");
           break;
       }
     }
@@ -156,51 +180,28 @@ class Instruction {
     required int quantRegPontoFlutuante,
   }) {
     var t = '$opCode ';
-    var calculo0 = 0;
-    var calculo1 = 0;
-    var calculo2 = 0;
-
-    if (registerName0 == 'F') {
-      calculo0 = register0.id - quantRegPontoFlutuante;
-    } else {
-      calculo0 = register0.id;
-    }
-    if (register1 != null) {
-      if (registerName1 == 'F') {
-        calculo1 = register1!.id - quantRegPontoFlutuante;
-      } else {
-        calculo1 = register1!.id;
-      }
-    }
-    if (register2 != null) {
-      if (registerName2 == 'F') {
-        calculo2 = register2!.id - quantRegPontoFlutuante;
-      } else {
-        calculo2 = register2!.id;
-      }
-    }
 
     if (opCode != OpCode.store && regFake.containsKey(register0)) {
-      t += '${registerName0}K${calculo0},';
+      t += '${registerName0}K${register0.idOriginal},';
     } else if (opCode != OpCode.store) {
-      t += '${registerName0}${calculo0},';
+      t += '${registerName0}${register0.idOriginal},';
     } else {
-      t += '${registerName2}${calculo2},';
+      t += '${registerName2}${register2!.idOriginal},';
     }
 
     if (register1 != null) {
-      t += ' ${registerName1}${calculo1}, ';
+      t += ' ${registerName1}${register1!.idOriginal}, ';
     } else {
       t += ' ${value1}, ';
     }
 
     if (opCode == OpCode.store && regFake.containsKey(register0)) {
-      t += '${registerName0}K${calculo0},\n';
+      t += '${registerName0}K${register0.idOriginal},\n';
     } else if (opCode == OpCode.store) {
-      t += '${registerName0}${calculo0},\n';
+      t += '${registerName0}${register0.idOriginal},\n';
     } else {
       if (register2 != null) {
-        t += '${registerName2}${calculo2},\n';
+        t += '${registerName2}${register2!.idOriginal},\n';
       } else {
         t += ' ${value2};\n';
       }
