@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'enums.dart';
 import 'register.dart';
 
@@ -16,7 +14,6 @@ class Instruction {
     this.value2,
   });
 
-  int id = -1;
   final OpCode opCode;
   final String registerName0;
   final Registrador register0;
@@ -30,13 +27,11 @@ class Instruction {
   bool? dependenciaFalsa = false;
   bool? waitRegister = false;
 
-  State state = State.ready;
-
   void execute({
     required Map<Registrador, double> regFake,
   }) {
     // Colocar print dos resultados das ops.
-    double operacao = 0;
+    var operacao = 0.0;
 
     if (register2 != null && register1 != null) {
       // Switch Completo -> Três registradores.
@@ -155,9 +150,10 @@ class Instruction {
     }
   }
 
-  void mostraRegistrador(
-      {required Map<Registrador, double> regFake,
-      required int quantRegPontoFlutuante}) {
+  void mostraRegistrador({
+    required Map<Registrador, double> regFake,
+    required int quantRegPontoFlutuante,
+  }) {
     var t = '$opCode ';
     var calculo0 = 0;
     var calculo1 = 0;
@@ -187,10 +183,7 @@ class Instruction {
       t += '${registerName0}K${calculo0},';
     } else if (opCode != OpCode.store) {
       t += '${registerName0}${calculo0},';
-    } /*else if(regFake.containsKey(register2)){
-      t += 'R${register2!.id},';
-    }*/
-    else {
+    } else {
       t += '${registerName2}${calculo2},';
     }
 

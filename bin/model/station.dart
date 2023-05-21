@@ -3,17 +3,9 @@ import 'instruction.dart';
 import 'register.dart';
 
 class Station {
-  Station({
-    required this.opCodes,
-    required this.id,
-  });
-
-  final List<OpCode> opCodes;
-  int id;
   int cyclesLeft = 0;
   var started = true;
   Instruction? currentInstruction;
-  List<Instruction> waitingInstruction = [];
 
   //colocar ocupado nos registradores // OK
   //terminar o loadInstruction pra colocar na station
@@ -30,16 +22,11 @@ class Station {
 
     instruction.register0.st = sta;
 
-    // if (instruction.dependenciaVerdadeira == false) {
     carregadaInicial(
       instruction: instruction,
       regFake: regFake,
       quantRegPontoFlutuante: quantRegPontoFlutuante,
     );
-    // }
-    // TODO: fix
-    // if(instruction.register0)
-    // currentInstruction!.waitRegister = verifyStateRegisters(registers);
 
     if (instruction.waitRegister == false) {
       carregaRegistradores(sta);
@@ -99,7 +86,6 @@ class Station {
 
   // nextStep da propria station solo
   bool nextStep({
-    required List<Registrador> registers,
     required Map<Registrador, double> regFake,
     required List<Instruction> reOrderBuffer,
     required int quantRegPontoFlutuante,
@@ -119,40 +105,31 @@ class Station {
       currentInstruction!.execute(regFake: regFake);
 
       if (regFake.containsKey(currentInstruction!.register0)) {
-        // if (currentInstruction!.register2!.state == StateRegister.reading ||
-        //     currentInstruction!.register2!.state == StateRegister.none) {
         if (currentInstruction!.dependenciaFalsa == true) {
           currentInstruction!.register0.valorRegistrador =
               regFake[currentInstruction!.register0]!;
           regFake.remove(currentInstruction!.register0);
         }
-        // }
       }
 
       if (currentInstruction!.register1 != null &&
           regFake.containsKey(currentInstruction!.register1)) {
-        // if (currentInstruction!.register0.state == StateRegister.reading ||
-        //     currentInstruction!.register0.state == StateRegister.none) {
         if (currentInstruction!.dependenciaFalsa == true) {
           currentInstruction!.register1!.valorRegistrador =
               regFake[currentInstruction!.register1]!;
           regFake.remove(currentInstruction!.register1);
         }
-        // }
       }
       if (currentInstruction!.register2 != null &&
           regFake.containsKey(currentInstruction!.register2)) {
-        // if (currentInstruction!.register0.state == StateRegister.reading ||
-        //     currentInstruction!.register0.state == StateRegister.none) {
         if (currentInstruction!.dependenciaFalsa == true) {
           currentInstruction!.register2!.valorRegistrador =
               regFake[currentInstruction!.register2]!;
           regFake.remove(currentInstruction!.register2);
         }
-        // }
       }
 
-      for (var element in currentInstruction!.register0.waitingInstruction) {
+      for (var element in currentInstruction!.register0.waitingInstructions) {
         element.dependenciaVerdadeira = false;
         element.register0.st!.cyclesLeft--;
         element.register0.st!.taExecutandoEM(
@@ -160,7 +137,7 @@ class Station {
           quantRegPontoFlutuante: quantRegPontoFlutuante,
         );
       }
-      currentInstruction!.register0.waitingInstruction.clear();
+      currentInstruction!.register0.waitingInstructions.clear();
 
       reOrderBuffer.remove(currentInstruction);
       liberaRegistrador();
@@ -176,11 +153,9 @@ class Station {
   }) {
     print('Executando:');
 
-    // if (currentInstruction != null) {
     currentInstruction?.mostraRegistrador(
       regFake: regFake,
       quantRegPontoFlutuante: quantRegPontoFlutuante,
     );
-    // }
   }
 }

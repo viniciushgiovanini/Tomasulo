@@ -7,12 +7,6 @@ enum OpCode {
   store,
 }
 
-enum State {
-  ready,
-  waiting,
-  done,
-}
-
 enum StateRegister {
   none,
   reading,

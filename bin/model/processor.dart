@@ -4,16 +4,13 @@ import 'register.dart';
 import 'station_group.dart';
 
 class Processor {
-  Processor({
-    required this.costs,
-  });
+  Processor({required this.costs});
 
   static int quantRegTotal = 32;
   static int quantRegPontoFlutuante = 12;
   static int quantRegNormal = quantRegTotal - quantRegPontoFlutuante;
-  int n = 1;
-  int ids = 0;
-  List<StationGroup> listStations = [];
+  int cicloAtual = 1;
+  List<StationGroup> stationList = [];
   List<Instruction> reOrderBuffer = [];
   final List<Instruction> instructions = [];
   final Map<OpCode, int> costs;
@@ -31,12 +28,15 @@ class Processor {
 
   void criarEstacoes({
     required List<OpCode> opCode,
-    required int numStatio,
+    required int numStation,
   }) {
-    StationGroup novaStationGroup =
-        new StationGroup(opCodes: opCode, numStations: numStatio, costs: costs);
+    var novaStationGroup = new StationGroup(
+      opCodes: opCode,
+      numStations: numStation,
+      costs: costs,
+    );
 
-    this.listStations.add(novaStationGroup);
+    this.stationList.add(novaStationGroup);
   }
 
   void inserirInstrucao({
@@ -51,15 +51,16 @@ class Processor {
     double? value2,
   }) {
     entradaValida(
-        opCode: opCode,
-        register0: register0,
-        register1: register1,
-        register2: register2,
-        registerName0: registerName0,
-        registerName1: registerName1,
-        registerName2: registerName2,
-        value1: value1,
-        value2: value2);
+      opCode: opCode,
+      register0: register0,
+      register1: register1,
+      register2: register2,
+      registerName0: registerName0,
+      registerName1: registerName1,
+      registerName2: registerName2,
+      value1: value1,
+      value2: value2,
+    );
 
     if (registerName0 == 'F') {
       register0 += quantRegNormal;
@@ -73,51 +74,64 @@ class Processor {
 
     if (opCode != OpCode.store) {
       if (register1 != null && register2 != null)
-        instructions.add(Instruction(
+        instructions.add(
+          Instruction(
             opCode: opCode,
             register0: reg[register0],
             registerName0: registerName0,
             register1: reg[register1],
             registerName1: registerName1,
             register2: reg[register2],
-            registerName2: registerName2));
+            registerName2: registerName2,
+          ),
+        );
       else if (register1 != null) {
-        instructions.add(Instruction(
+        instructions.add(
+          Instruction(
             opCode: opCode,
             register0: reg[register0],
             registerName0: registerName0,
             register1: reg[register1],
             registerName1: registerName1,
-            value2: value2));
+            value2: value2,
+          ),
+        );
       } else {
-        instructions.add(Instruction(
+        instructions.add(
+          Instruction(
             opCode: opCode,
             register0: reg[register0],
             registerName0: registerName0,
             value1: value1,
             register2: reg[register2],
-            registerName2: registerName2));
+            registerName2: registerName2,
+          ),
+        );
       }
     } else {
       if (register1 != null)
-        instructions.add(Instruction(
-          opCode: opCode,
-          register0: reg[register2],
-          registerName0: registerName2,
-          register1: reg[register1],
-          registerName1: registerName1,
-          register2: reg[register0],
-          registerName2: registerName0,
-        ));
+        instructions.add(
+          Instruction(
+            opCode: opCode,
+            register0: reg[register2],
+            registerName0: registerName2,
+            register1: reg[register1],
+            registerName1: registerName1,
+            register2: reg[register0],
+            registerName2: registerName0,
+          ),
+        );
       else {
-        instructions.add(Instruction(
-          opCode: opCode,
-          register0: reg[register2],
-          registerName0: registerName2,
-          value1: value1,
-          register2: reg[register0],
-          registerName2: registerName0,
-        ));
+        instructions.add(
+          Instruction(
+            opCode: opCode,
+            register0: reg[register2],
+            registerName0: registerName2,
+            value1: value1,
+            register2: reg[register0],
+            registerName2: registerName0,
+          ),
+        );
       }
     }
   }
@@ -224,21 +238,21 @@ class Processor {
 
   bool nextStep() {
     print("----------------------------------------------------");
-    print(">> Ciclo ${n++}");
+    print(">> Ciclo ${cicloAtual++}");
     print("----------------------------------------------------\n");
 
-    for (var stationGroup in listStations) {
+    for (var stationGroup in stationList) {
       stationGroup.nextStep(
-          registers: reg,
-          reOrderBuffer: reOrderBuffer,
-          regFake: regFake,
-          quantRegPontoFlutuante: quantRegPontoFlutuante);
+        reOrderBuffer: reOrderBuffer,
+        regFake: regFake,
+        quantRegPontoFlutuante: quantRegPontoFlutuante,
+      );
     }
 
     if (instructions.isNotEmpty) {
       final instruction = instructions.elementAt(0);
 
-      for (final stationGroup in listStations) {
+      for (final stationGroup in stationList) {
         if (stationGroup.opCodes.contains(instruction.opCode)) {
           instructions.removeAt(0);
           reOrderBuffer.add(instruction);
@@ -246,7 +260,6 @@ class Processor {
             instruction: instruction,
             reOrderBuffer: reOrderBuffer,
             regFake: regFake,
-            registers: reg,
             quantRegPontoFlutuante: quantRegPontoFlutuante,
           );
 

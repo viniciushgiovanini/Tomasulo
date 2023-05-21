@@ -10,18 +10,17 @@ class StationGroup {
     required this.costs,
   });
 
-  final List<OpCode> opCodes;
   final int numStations;
-  // late List<List<Instruction>> instrucoesEspera =
-  //     List.generate(numStations, (index) => new List<Instruction> = [];
-  late List<Station> stations = List.generate(
-      numStations, (index) => new Station(opCodes: opCodes, id: index));
-  late List<Instruction> instrucoes = [];
+  final List<OpCode> opCodes;
   final Map<OpCode, int> costs;
+  late List<Instruction> instrucoes = [];
+  late List<Station> stations = List.generate(
+    numStations,
+    (index) => new Station(),
+  );
 
   bool loadInstruction({
     Instruction? instruction,
-    required List<Registrador> registers,
     required Map<Registrador, double> regFake,
     required List<Instruction> reOrderBuffer,
     required int quantRegPontoFlutuante,
@@ -47,22 +46,18 @@ class StationGroup {
     }
 
     if (sta != null) {
-      // if (sta.currentInstruction == null) {
       podeColocar(
         reOrderBuffer: reOrderBuffer,
         regFake: regFake,
-        registers: registers,
         sta: sta,
         quantRegPontoFlutuante: quantRegPontoFlutuante,
       );
-      // }
     } else {
       for (var element in stations) {
         if (element.currentInstruction == null) {
           if (podeColocar(
                 reOrderBuffer: reOrderBuffer,
                 regFake: regFake,
-                registers: registers,
                 sta: element,
                 quantRegPontoFlutuante: quantRegPontoFlutuante,
               ) ==
@@ -78,82 +73,43 @@ class StationGroup {
   }
 
   bool podeColocar({
-    required List<Registrador> registers,
     required Map<Registrador, double> regFake,
     required List<Instruction> reOrderBuffer,
     required Station sta,
     required int quantRegPontoFlutuante,
   }) {
     if (instrucoes.length > 0) {
-      int posicao = pesquisaInstrucao(
-          reOrderBuffer: reOrderBuffer, instruction: instrucoes[0]);
+      var posicao = pesquisaInstrucao(
+        reOrderBuffer: reOrderBuffer,
+        instruction: instrucoes[0],
+      );
 
       if (posicao >= 1) {
-        for (int j = posicao - 1; j >= 0; j--) {
+        for (var j = posicao - 1; j >= 0; j--) {
           if (verificaDependencias(reOrderBuffer[j], instrucoes[0], regFake) ==
               true) {
             break;
-            // if (j == 0) {
-            //   sta.loadInstruction(
-            //       instruction: instrucoes[0],
-            //       costs: costs[instrucoes[0].opCode]!,
-            //       sta: sta,
-            //       regFake: regFake);
-            //   instrucoes.remove(instrucoes[0]);
-            //   return true;
-            // }
           }
         }
       }
+
       sta.loadInstruction(
-          instruction: instrucoes[0],
-          costs: costs[instrucoes[0].opCode]!,
-          sta: sta,
-          regFake: regFake,
-          quantRegPontoFlutuante: quantRegPontoFlutuante);
+        instruction: instrucoes[0],
+        costs: costs[instrucoes[0].opCode]!,
+        sta: sta,
+        regFake: regFake,
+        quantRegPontoFlutuante: quantRegPontoFlutuante,
+      );
+
       instrucoes.remove(instrucoes[0]);
+
       return true;
     }
-
-    //   for (int i = 0; i < instrucoes.length; i++) {
-    //     int posicao = pesquisaInstrucao(
-    //         reOrderBuffer: reOrderBuffer, instruction: instrucoes[i]);
-    //     if (posicao >= 1) {
-    //       for (int j = posicao - 1; j >= 0; j--) {
-    //         if (verificaDependencias(
-    //                 reOrderBuffer[j], instrucoes[i], regFake) ==
-    //             false) {
-    //           if (j == 0) {
-    //             sta.loadInstruction(
-    //                 instruction: instrucoes[i],
-    //                 costs: costs[instrucoes[i].opCode]!,
-    //                 sta: sta,
-    //                 regFake: regFake);
-    //             instrucoes.remove(instrucoes[i]);
-    //             return true;
-    //           }
-    //         } else {
-    //           return true;
-    //         }
-    //       }
-    //     } else {
-    //       sta.loadInstruction(
-    //           instruction: instrucoes[i],
-    //           costs: costs[instrucoes[i].opCode]!,
-    //           sta: sta,
-    //           regFake: regFake);
-    //       instrucoes.remove(instrucoes[i]);
-    //       return true;
-    //     }
-    //   }
-    // } else {
-    //   return true;
 
     return false;
   }
 
   bool nextStep({
-    required List<Registrador> registers,
     required List<Instruction> reOrderBuffer,
     required Map<Registrador, double> regFake,
     required int quantRegPontoFlutuante,
@@ -162,7 +118,6 @@ class StationGroup {
       if (element.currentInstruction != null) {
         if (element.currentInstruction!.dependenciaVerdadeira == false) {
           element.nextStep(
-            registers: registers,
             regFake: regFake,
             reOrderBuffer: reOrderBuffer,
             quantRegPontoFlutuante: quantRegPontoFlutuante,
@@ -170,7 +125,6 @@ class StationGroup {
         }
       } else {
         loadInstruction(
-          registers: registers,
           regFake: regFake,
           reOrderBuffer: reOrderBuffer,
           sta: element,
@@ -212,19 +166,17 @@ class StationGroup {
     if (novaInstrucao.register1 != null) {
       if (instruction.register0 == novaInstrucao.register1) {
         instruction.waitRegister = true;
-        instruction.register0.waitingInstruction.add(novaInstrucao);
+        instruction.register0.waitingInstructions.add(novaInstrucao);
         return true;
       }
     }
     if (novaInstrucao.register2 != null) {
       if (instruction.register0 == novaInstrucao.register2) {
         instruction.waitRegister = true;
-        instruction.register0.waitingInstruction.add(novaInstrucao);
+        instruction.register0.waitingInstructions.add(novaInstrucao);
         return true;
       }
     }
-
-    // TODO: FAZER SE A novaInstrucao É STORE
 
     return false;
   }

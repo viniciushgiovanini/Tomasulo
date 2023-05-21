@@ -23,9 +23,9 @@ void main() {
       OpCode.store: 8,
     },
   );
-  processor.criarEstacoes(opCode: [OpCode.add, OpCode.sub], numStatio: 2);
-  processor.criarEstacoes(opCode: [OpCode.mul, OpCode.div], numStatio: 2);
-  processor.criarEstacoes(opCode: [OpCode.load, OpCode.store], numStatio: 2);
+  processor.criarEstacoes(opCode: [OpCode.add, OpCode.sub], numStation: 2);
+  processor.criarEstacoes(opCode: [OpCode.mul, OpCode.div], numStation: 2);
+  processor.criarEstacoes(opCode: [OpCode.load, OpCode.store], numStation: 2);
 
   // // Teste 1
   // // ---------------------------------------------------------------------
