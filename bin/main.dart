@@ -17,6 +17,7 @@ void main() async {
   final processor = new Processor(
     costs: {
       OpCode.add: 4,
+      OpCode.sub: 4,
       OpCode.mul: 12,
       OpCode.div: 12,
       OpCode.load: 8,

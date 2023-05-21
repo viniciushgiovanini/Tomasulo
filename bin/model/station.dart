@@ -14,13 +14,12 @@ class Station {
   void loadInstruction({
     required Instruction instruction,
     required int costs,
-    required Station sta,
     required Map<Registrador, double> regFake,
     required int quantRegPontoFlutuante,
   }) {
     currentInstruction = instruction;
 
-    instruction.register0.st = sta;
+    instruction.register0.st = this;
 
     carregadaInicial(
       instruction: instruction,
@@ -29,7 +28,7 @@ class Station {
     );
 
     if (instruction.waitRegister == false) {
-      carregaRegistradores(sta);
+      carregaRegistradores(this);
     }
 
     cyclesLeft = costs;

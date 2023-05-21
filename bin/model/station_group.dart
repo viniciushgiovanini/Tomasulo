@@ -96,7 +96,6 @@ class StationGroup {
       sta.loadInstruction(
         instruction: instrucoes[0],
         costs: costs[instrucoes[0].opCode]!,
-        sta: sta,
         regFake: regFake,
         quantRegPontoFlutuante: quantRegPontoFlutuante,
       );
