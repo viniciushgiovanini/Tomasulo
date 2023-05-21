@@ -39,14 +39,28 @@ class Processor {
     this.stationList.add(novaStationGroup);
   }
 
+  void inserirInstrucaoMesmo(Instruction instruction) {
+    inserirInstrucao(
+      opCode: instruction.opCode,
+      registerName0: instruction.registerName0,
+      register0: instruction.register0.id,
+      register1: instruction.register1?.id,
+      register2: instruction.register2?.id,
+      registerName1: instruction.registerName1,
+      registerName2: instruction.registerName2,
+      value1: instruction.value1,
+      value2: instruction.value2,
+    );
+  }
+
   void inserirInstrucao({
     required opCode,
     required String registerName0,
     required int register0,
-    register1,
-    register2,
-    registerName1,
-    registerName2,
+    int? register1,
+    int? register2,
+    String? registerName1,
+    String? registerName2,
     double? value1,
     double? value2,
   }) {
@@ -66,10 +80,14 @@ class Processor {
       register0 += quantRegNormal;
     }
     if (registerName1 == 'F') {
-      register1 += quantRegNormal;
+      if (register1 != null) {
+        register1 += quantRegNormal;
+      }
     }
     if (registerName2 == 'F') {
-      register2 += quantRegNormal;
+      if (register2 != null) {
+        register2 += quantRegNormal;
+      }
     }
 
     if (opCode != OpCode.store) {
@@ -103,7 +121,7 @@ class Processor {
             register0: reg[register0],
             registerName0: registerName0,
             value1: value1,
-            register2: reg[register2],
+            register2: reg[register2!],
             registerName2: registerName2,
           ),
         );
@@ -113,8 +131,8 @@ class Processor {
         instructions.add(
           Instruction(
             opCode: opCode,
-            register0: reg[register2],
-            registerName0: registerName2,
+            register0: reg[register2!],
+            registerName0: registerName2!,
             register1: reg[register1],
             registerName1: registerName1,
             register2: reg[register0],
@@ -125,8 +143,8 @@ class Processor {
         instructions.add(
           Instruction(
             opCode: opCode,
-            register0: reg[register2],
-            registerName0: registerName2,
+            register0: reg[register2!],
+            registerName0: registerName2!,
             value1: value1,
             register2: reg[register0],
             registerName2: registerName0,
@@ -136,14 +154,14 @@ class Processor {
     }
   }
 
-  void entradaValida({
+  static void entradaValida({
     required opCode,
     required String registerName0,
     required int register0,
     registerName1,
-    register1,
+    int? register1,
     registerName2,
-    register2,
+    int? register2,
     double? value1,
     double? value2,
   }) {
@@ -153,7 +171,7 @@ class Processor {
         throw 'Registrador 2 invalido';
       }
       if (register1 != null) {
-        throw 'Erro na intrução';
+        throw 'Erro na instrução';
       }
       // R0 e R2 devem ser do mesmo tipo
       if (opCode == OpCode.load) {

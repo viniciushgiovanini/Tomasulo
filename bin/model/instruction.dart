@@ -1,4 +1,5 @@
 import 'enums.dart';
+import 'processor.dart';
 import 'register.dart';
 
 class Instruction {
@@ -14,15 +15,15 @@ class Instruction {
     this.value2,
   });
 
-  final OpCode opCode;
-  final String registerName0;
-  final Registrador register0;
-  final String? registerName1;
-  final Registrador? register1;
-  final String? registerName2;
-  final Registrador? register2;
-  final double? value1;
-  final double? value2;
+  OpCode opCode;
+  String registerName0;
+  Registrador register0;
+  String? registerName1;
+  Registrador? register1;
+  String? registerName2;
+  Registrador? register2;
+  double? value1;
+  double? value2;
   bool? dependenciaVerdadeira = false;
   bool? dependenciaFalsa = false;
   bool? waitRegister = false;
@@ -206,5 +207,28 @@ class Instruction {
     }
 
     print(t);
+  }
+
+  void validar() {
+    Processor.entradaValida(
+      opCode: opCode,
+      register0: register0.id,
+      register1: register1?.id,
+      register2: register2?.id,
+      registerName0: registerName0,
+      registerName1: registerName1,
+      registerName2: registerName2,
+      value1: value1,
+      value2: value2,
+    );
+  }
+
+  @override
+  String toString() {
+    final a = '${registerName0}${register0.id}';
+    final b = '${registerName1 ?? ''}${register1?.id ?? value1 ?? ''}';
+    final c = '${registerName2 ?? ''}${register2?.id ?? value2 ?? ''}';
+
+    return '${opCode} ${a} ${b} ${c}';
   }
 }
