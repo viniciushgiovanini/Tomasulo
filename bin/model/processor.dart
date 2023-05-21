@@ -14,15 +14,10 @@ class Processor {
   List<Instruction> reOrderBuffer = [];
   final List<Instruction> instructions = [];
   final Map<OpCode, int> costs;
-  final List<Registrador> reg = (() {
-    final t = <Registrador>[];
-    for (var i = 0; i < quantRegTotal; i++) {
-      t.add(new Registrador());
-      t[i].id = i;
-    }
-
-    return t;
-  })();
+  final List<Registrador> reg = List.generate(
+    quantRegTotal,
+    (index) => new Registrador(id: index),
+  );
 
   final Map<Registrador, double> regFake = {};
 
@@ -43,11 +38,11 @@ class Processor {
     inserirInstrucao(
       opCode: instruction.opCode,
       registerName0: instruction.registerName0,
+      registerName1: instruction.registerName1,
+      registerName2: instruction.registerName2,
       register0: instruction.register0.id,
       register1: instruction.register1?.id,
       register2: instruction.register2?.id,
-      registerName1: instruction.registerName1,
-      registerName2: instruction.registerName2,
       value1: instruction.value1,
       value2: instruction.value2,
     );

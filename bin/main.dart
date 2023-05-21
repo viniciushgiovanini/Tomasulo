@@ -28,8 +28,8 @@ void main() async {
   processor.criarEstacoes(opCode: [OpCode.mul, OpCode.div], numStation: 2);
   processor.criarEstacoes(opCode: [OpCode.load, OpCode.store], numStation: 2);
 
-  await importar(processor: processor);
-  // c(processor: processor);
+  // await importar(processor: processor);
+  c(processor: processor);
 
   while (processor.nextStep());
 

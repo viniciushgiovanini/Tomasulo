@@ -20,7 +20,7 @@ class IO {
       final instruction = Instruction(
         opCode: OpCode.add,
         registerName0: '',
-        register0: Registrador(),
+        register0: Registrador(id: 0),
       );
 
       switch (parts[0]) {
