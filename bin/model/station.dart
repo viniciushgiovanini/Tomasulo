@@ -31,7 +31,7 @@ class Station {
       quantRegPontoFlutuante: quantRegPontoFlutuante,
     );
 
-    if (instruction.waitRegister == false) {
+    if (instruction.dependenciaVerdadeira == false) {
       carregaRegistradores(this);
     }
 
@@ -146,7 +146,6 @@ class Station {
       }
 
       currentInstruction!.dependenciaFalsa = false;
-
       for (var element in this.waitingInstructions) {
         element.dependenciaVerdadeira = false;
         element.sta!.cyclesLeft--;

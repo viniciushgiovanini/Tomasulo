@@ -16,17 +16,17 @@ void main() async {
   // );
   final processor = new Processor(
     costs: {
-      OpCode.add: 2,
-      OpCode.sub: 2,
-      OpCode.mul: 10,
-      OpCode.div: 40,
-      OpCode.load: 2,
-      OpCode.store: 2,
+      OpCode.add: 4,
+      OpCode.sub: 4,
+      OpCode.mul: 12,
+      OpCode.div: 12,
+      OpCode.load: 8,
+      OpCode.store: 8,
     },
   );
   processor.criarEstacoes(opCode: [OpCode.add, OpCode.sub], numStation: 2);
-  processor.criarEstacoes(opCode: [OpCode.mul, OpCode.div], numStation: 3);
-  processor.criarEstacoes(opCode: [OpCode.load, OpCode.store], numStation: 4);
+  processor.criarEstacoes(opCode: [OpCode.mul, OpCode.div], numStation: 2);
+  processor.criarEstacoes(opCode: [OpCode.load, OpCode.store], numStation: 2);
 
   await importar(processor: processor);
   // c(processor: processor);
