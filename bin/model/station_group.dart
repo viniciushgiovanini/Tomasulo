@@ -120,6 +120,13 @@ class StationGroup {
   }) {
     for (var element in stations) {
       if (element.currentInstruction != null) {
+        if (element.currentInstruction!.dependenciaVerdadeira == true) {
+          if (element.cyclesLeft ==
+              costs[element.currentInstruction!.opCode]! - 1) {
+            element.currentInstruction!.dependenciaVerdadeira = false;
+          }
+        }
+
         if (element.currentInstruction!.dependenciaVerdadeira == false) {
           element.nextStep(
             regFake: regFake,

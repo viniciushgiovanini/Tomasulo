@@ -16,11 +16,11 @@ void main() async {
   // );
   final processor = new Processor(
     costs: {
-      OpCode.add: 4,
-      OpCode.sub: 4,
-      OpCode.mul: 12,
-      OpCode.div: 12,
-      OpCode.load: 8,
+      OpCode.add: 2,
+      OpCode.sub: 2,
+      OpCode.mul: 10,
+      OpCode.div: 40,
+      OpCode.load: 2,
       OpCode.store: 8,
     },
   );
