@@ -266,37 +266,88 @@ class Processor {
     print(">> Ciclo ${cicloAtual++}");
     print("----------------------------------------------------\n");
 
-    for (var stationGroup in stationList) {
-      stationGroup.nextStep(
-        reOrderBuffer: reOrderBuffer,
-        regFake: regFake,
-        quantRegPontoFlutuante: quantRegPontoFlutuante,
-      );
+    for (var i = 0; i < reOrderBuffer.length; i++) {
+      final instruction = reOrderBuffer[i];
+
+      /// acho q n tem station
+      /// percorre a station group
+
+      final station = instruction.sta;
+
+      if (station == null) {
+        // TODO: fix
+
+        loadToStationAAAAAAAAAAAAAAAA(instruction);
+      } else {
+        if (station.currentInstruction != null) {
+          if (station.currentInstruction?.dependenciaVerdadeira == false) {
+            station.nextStep(
+              regFake: regFake,
+              reOrderBuffer: reOrderBuffer,
+              quantRegPontoFlutuante: quantRegPontoFlutuante,
+            );
+          }
+        }
+      }
+
+      // for pelo reorder buffer das q n tem station
+
+      // load
     }
+
+    // TODO: fix, marcos
+    // for (var stationGroup in stationList) {
+    //   stationGroup.nextStep(
+    //     reOrderBuffer: reOrderBuffer,
+    //     regFake: regFake,
+    //     quantRegPontoFlutuante: quantRegPontoFlutuante,
+    //   );
+    // }
 
     if (instructions.isNotEmpty) {
       final instruction = instructions.elementAt(0);
 
-      for (final stationGroup in stationList) {
-        if (stationGroup.opCodes.contains(instruction.opCode)) {
-          instructions.removeAt(0);
-          reOrderBuffer.add(instruction);
-          stationGroup.loadInstruction(
-            instruction: instruction,
-            reOrderBuffer: reOrderBuffer,
-            regFake: regFake,
-            quantRegPontoFlutuante: quantRegPontoFlutuante,
-          );
+      final a = loadToStation(instruction);
 
-          return true;
-        }
+      if (a == true) {
+        return true;
       }
     }
 
-    if (reOrderBuffer.length == 1) {
-      return true;
-    }
-
     return reOrderBuffer.length > 0;
+  }
+
+  // Tira uma intrução normal e colcoa no reorder buffer.
+  bool? loadToStation(Instruction instruction) {
+    for (final stationGroup in stationList) {
+      if (stationGroup.opCodes.contains(instruction.opCode)) {
+        instructions.removeAt(0);
+        reOrderBuffer.add(instruction);
+        stationGroup.loadInstruction(
+          instruction: instruction,
+          reOrderBuffer: reOrderBuffer,
+          regFake: regFake,
+          quantRegPontoFlutuante: quantRegPontoFlutuante,
+        );
+
+        return true;
+      }
+    }
+  }
+
+  // N mexe com as intruções normais.
+  bool? loadToStationAAAAAAAAAAAAAAAA(Instruction instruction) {
+    for (final stationGroup in stationList) {
+      if (stationGroup.opCodes.contains(instruction.opCode)) {
+        stationGroup.loadInstruction(
+          instruction: instruction,
+          reOrderBuffer: reOrderBuffer,
+          regFake: regFake,
+          quantRegPontoFlutuante: quantRegPontoFlutuante,
+        );
+
+        return true;
+      }
+    }
   }
 }

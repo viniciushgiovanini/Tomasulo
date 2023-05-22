@@ -148,7 +148,8 @@ class Station {
       currentInstruction!.dependenciaFalsa = false;
       for (var element in this.waitingInstructions) {
         element.dependenciaVerdadeira = false;
-        element.sta!.cyclesLeft--;
+        // TODO: fix
+        // element.sta!.cyclesLeft--;
         element.sta!.taExecutandoEM(
           regFake: regFake,
           quantRegPontoFlutuante: quantRegPontoFlutuante,
