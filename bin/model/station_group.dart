@@ -13,6 +13,10 @@ class StationGroup {
   final int numStations;
   final List<OpCode> opCodes;
   final Map<OpCode, int> costs;
+  // late List<List<Instruction>> waitingInstructions = List.generate(
+  //   numStations,
+  //   (index2) => <Instruction>[],
+  // );
   late List<Instruction> instrucoes = [];
   late List<Station> stations = List.generate(
     numStations,
@@ -86,7 +90,8 @@ class StationGroup {
 
       if (posicao >= 1) {
         for (var j = posicao - 1; j >= 0; j--) {
-          if (verificaDependencias(reOrderBuffer[j], instrucoes[0], regFake) ==
+          if (verificaDependencias(
+                  reOrderBuffer[j], instrucoes[0], regFake, sta) ==
               true) {
             break;
           }
@@ -147,8 +152,9 @@ class StationGroup {
     Instruction instruction,
     Instruction novaInstrucao,
     Map<Registrador, double> regFake,
+    Station sta,
   ) {
-    if (dependenciaVerdadeira(instruction, novaInstrucao)) {
+    if (dependenciaVerdadeira(instruction, novaInstrucao, sta)) {
       novaInstrucao.dependenciaVerdadeira = true;
       return true;
     }
@@ -161,18 +167,19 @@ class StationGroup {
   bool dependenciaVerdadeira(
     Instruction instruction,
     Instruction novaInstrucao,
+    Station sta,
   ) {
     if (novaInstrucao.register1 != null) {
       if (instruction.register0 == novaInstrucao.register1) {
         instruction.waitRegister = true;
-        instruction.register0.waitingInstructions.add(novaInstrucao);
+        instruction.sta!.waitingInstructions.add(novaInstrucao);
         return true;
       }
     }
     if (novaInstrucao.register2 != null) {
       if (instruction.register0 == novaInstrucao.register2) {
         instruction.waitRegister = true;
-        instruction.register0.waitingInstructions.add(novaInstrucao);
+        instruction.sta!.waitingInstructions.add(novaInstrucao);
         return true;
       }
     }
@@ -190,6 +197,14 @@ class StationGroup {
       regFake[instruction.register0] = instruction.register0.valorRegistrador;
       instruction.waitRegister = true;
       instruction.dependenciaFalsa = true;
+
+      if (!instruction.register0.dependenciaFalsa.contains(instruction)) {
+        instruction.register0.dependenciaFalsa.add(instruction);
+      }
+
+      if (!instruction.register0.dependenciaFalsa.contains(novaInstrucao)) {
+        instruction.register0.dependenciaFalsa.add(novaInstrucao);
+      }
       return true;
     }
 
@@ -199,6 +214,14 @@ class StationGroup {
             instruction.register1!.valorRegistrador;
         instruction.waitRegister = true;
         instruction.dependenciaFalsa = true;
+
+        if (!instruction.register1!.dependenciaFalsa.contains(instruction)) {
+          instruction.register1!.dependenciaFalsa.add(instruction);
+        }
+        if (!instruction.register1!.dependenciaFalsa.contains(novaInstrucao)) {
+          instruction.register1!.dependenciaFalsa.add(novaInstrucao);
+        }
+
         return true;
       }
     }
@@ -209,6 +232,14 @@ class StationGroup {
             instruction.register2!.valorRegistrador;
         instruction.waitRegister = true;
         instruction.dependenciaFalsa = true;
+
+        if (!instruction.register2!.dependenciaFalsa.contains(instruction)) {
+          instruction.register2!.dependenciaFalsa.add(instruction);
+        }
+        if (!instruction.register2!.dependenciaFalsa.contains(novaInstrucao)) {
+          instruction.register2!.dependenciaFalsa.add(novaInstrucao);
+        }
+
         return true;
       }
     }

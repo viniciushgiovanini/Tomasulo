@@ -3,6 +3,11 @@ import 'instruction.dart';
 import 'register.dart';
 
 class Station {
+  // Station({
+  //   required this.id,
+  // });
+
+  List<Instruction> waitingInstructions = [];
   int cyclesLeft = 0;
   var started = true;
   Instruction? currentInstruction;
@@ -18,8 +23,7 @@ class Station {
     required int quantRegPontoFlutuante,
   }) {
     currentInstruction = instruction;
-
-    instruction.register0.st = this;
+    instruction.sta = this;
 
     carregadaInicial(
       instruction: instruction,
@@ -52,27 +56,23 @@ class Station {
   void carregaRegistradores(Station sta) {
     if (currentInstruction?.register0.state == StateRegister.none) {
       currentInstruction?.register0.state = StateRegister.recording;
-      currentInstruction?.register0.st = sta;
     }
 
     if (currentInstruction?.register1 != null) {
       if (currentInstruction?.register1!.state == StateRegister.none) {
         currentInstruction?.register1?.state = StateRegister.reading;
-        currentInstruction?.register1?.st = sta;
       }
     }
 
     if (currentInstruction?.register2 != null) {
       if (currentInstruction?.register2!.state == StateRegister.none) {
         currentInstruction?.register2?.state = StateRegister.reading;
-        currentInstruction?.register2?.st = sta;
       }
     }
   }
 
   void liberaRegistrador() {
     currentInstruction?.register0.state = StateRegister.none;
-    currentInstruction!.register0.st = null;
 
     if (currentInstruction?.register1 != null) {
       currentInstruction?.register1?.state = StateRegister.none;
@@ -105,38 +105,57 @@ class Station {
 
       if (regFake.containsKey(currentInstruction!.register0)) {
         if (currentInstruction!.dependenciaFalsa == true) {
-          currentInstruction!.register0.valorRegistrador =
-              regFake[currentInstruction!.register0]!;
-          regFake.remove(currentInstruction!.register0);
+          currentInstruction!.register0.dependenciaFalsa
+              .remove(currentInstruction);
+
+          if (currentInstruction!.register0.dependenciaFalsa.length == 1) {
+            currentInstruction!.register0.valorRegistrador =
+                regFake[currentInstruction!.register0]!;
+            regFake.remove(currentInstruction!.register0);
+            currentInstruction!.register0.dependenciaFalsa.clear();
+          }
         }
       }
-
       if (currentInstruction!.register1 != null &&
           regFake.containsKey(currentInstruction!.register1)) {
         if (currentInstruction!.dependenciaFalsa == true) {
-          currentInstruction!.register1!.valorRegistrador =
-              regFake[currentInstruction!.register1]!;
-          regFake.remove(currentInstruction!.register1);
+          currentInstruction!.register1!.dependenciaFalsa
+              .remove(currentInstruction);
+
+          if (currentInstruction!.register1!.dependenciaFalsa.length == 1) {
+            currentInstruction!.register1!.valorRegistrador =
+                regFake[currentInstruction!.register1]!;
+            regFake.remove(currentInstruction!.register1);
+            currentInstruction!.register1!.dependenciaFalsa.clear();
+          }
         }
       }
       if (currentInstruction!.register2 != null &&
           regFake.containsKey(currentInstruction!.register2)) {
         if (currentInstruction!.dependenciaFalsa == true) {
-          currentInstruction!.register2!.valorRegistrador =
-              regFake[currentInstruction!.register2]!;
-          regFake.remove(currentInstruction!.register2);
+          currentInstruction!.register2!.dependenciaFalsa
+              .remove(currentInstruction);
+
+          if (currentInstruction!.register2!.dependenciaFalsa.length == 1) {
+            currentInstruction!.register2!.valorRegistrador =
+                regFake[currentInstruction!.register2]!;
+            regFake.remove(currentInstruction!.register2);
+            currentInstruction!.register2!.dependenciaFalsa.clear();
+          }
         }
       }
 
-      for (var element in currentInstruction!.register0.waitingInstructions) {
+      currentInstruction!.dependenciaFalsa = false;
+
+      for (var element in this.waitingInstructions) {
         element.dependenciaVerdadeira = false;
-        element.register0.st!.cyclesLeft--;
-        element.register0.st!.taExecutandoEM(
+        element.sta!.cyclesLeft--;
+        element.sta!.taExecutandoEM(
           regFake: regFake,
           quantRegPontoFlutuante: quantRegPontoFlutuante,
         );
       }
-      currentInstruction!.register0.waitingInstructions.clear();
+      this.waitingInstructions.clear();
 
       reOrderBuffer.remove(currentInstruction);
       liberaRegistrador();

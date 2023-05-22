@@ -293,6 +293,10 @@ class Processor {
       }
     }
 
+    if (reOrderBuffer.length == 1) {
+      return true;
+    }
+
     return reOrderBuffer.length > 0;
   }
 }

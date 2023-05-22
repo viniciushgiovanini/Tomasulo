@@ -1,6 +1,7 @@
 import 'enums.dart';
 import 'processor.dart';
 import 'register.dart';
+import 'station.dart';
 
 class Instruction {
   Instruction({
@@ -15,6 +16,7 @@ class Instruction {
     this.value2,
   });
 
+  Station? sta;
   OpCode opCode;
   String registerName0;
   Registrador register0;
@@ -167,12 +169,13 @@ class Instruction {
           break;
       }
     }
-
-    if (!regFake.containsKey(register0)) {
-      register0.valorRegistrador = operacao;
-    } else {
-      regFake[register0] = operacao;
+    if (register0.dependenciaFalsa.length > 0) {
+      if (register0.dependenciaFalsa.last == this) {
+        regFake[register0] = operacao;
+        return;
+      }
     }
+    register0.valorRegistrador = operacao;
   }
 
   void mostraRegistrador({
