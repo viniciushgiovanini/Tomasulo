@@ -266,52 +266,35 @@ class Processor {
     print(">> Ciclo ${cicloAtual++}");
     print("----------------------------------------------------\n");
 
-    for (var i = 0; i < reOrderBuffer.length; i++) {
-      final instruction = reOrderBuffer[i];
-
-      /// acho q n tem station
-      /// percorre a station group
-
-      final station = instruction.sta;
-
-      if (station == null) {
-        // TODO: fix
-
-        loadToStationAAAAAAAAAAAAAAAA(instruction);
-      } else {
-        if (station.currentInstruction != null) {
-          if (station.currentInstruction?.dependenciaVerdadeira == false) {
-            station.nextStep(
-              regFake: regFake,
-              reOrderBuffer: reOrderBuffer,
-              quantRegPontoFlutuante: quantRegPontoFlutuante,
-            );
-          }
-        }
-      }
-
-      // for pelo reorder buffer das q n tem station
-
-      // load
+    for (var stationGroup in stationList) {
+      stationGroup.nextStep(
+        reOrderBuffer: reOrderBuffer,
+        regFake: regFake,
+        quantRegPontoFlutuante: quantRegPontoFlutuante,
+      );
     }
-
-    // TODO: fix, marcos
-    // for (var stationGroup in stationList) {
-    //   stationGroup.nextStep(
-    //     reOrderBuffer: reOrderBuffer,
-    //     regFake: regFake,
-    //     quantRegPontoFlutuante: quantRegPontoFlutuante,
-    //   );
-    // }
 
     if (instructions.isNotEmpty) {
       final instruction = instructions.elementAt(0);
 
-      final a = loadToStation(instruction);
+      for (final stationGroup in stationList) {
+        if (stationGroup.opCodes.contains(instruction.opCode)) {
+          instructions.removeAt(0);
+          reOrderBuffer.add(instruction);
+          stationGroup.loadInstruction(
+            instruction: instruction,
+            reOrderBuffer: reOrderBuffer,
+            regFake: regFake,
+            quantRegPontoFlutuante: quantRegPontoFlutuante,
+          );
 
-      if (a == true) {
-        return true;
+          return true;
+        }
       }
+    }
+
+    if (reOrderBuffer.length == 1) {
+      return true;
     }
 
     return reOrderBuffer.length > 0;
